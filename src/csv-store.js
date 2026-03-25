@@ -6,7 +6,7 @@ const BASE_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(BASE_DIR, 'data');
 const TRENDS_FILE = path.join(DATA_DIR, config.data.trendsFile || 'trends.csv');
 
-const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments';
+const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments,imageUrl';
 const TRENDS_HEADER = 'timestamp,region,period,artist,songId,title,rank,plays,likes';
 
 /**
@@ -70,7 +70,8 @@ function saveSongsData(artistData) {
         song.url,
         song.plays,
         song.likes,
-        song.comments
+        song.comments,
+        song.imageUrl || ''
       ]));
     }
 

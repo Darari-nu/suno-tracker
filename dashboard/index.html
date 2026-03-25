@@ -250,8 +250,8 @@
 
   <div class="grid-full">
     <div class="card">
-      <h2 id="overview-chart-title">再生数推移（上位10曲をハイライト）</h2>
-      <div class="chart-container-lg">
+      <h2 id="overview-chart-title">再生数ランキング（最新）</h2>
+      <div class="chart-container-lg" style="height:500px;">
         <canvas id="overview-chart"></canvas>
       </div>
     </div>
@@ -267,6 +267,9 @@
 
   <!-- 曲情報カード -->
   <div class="song-info-row" id="song-info-row" style="display:none;">
+    <div class="song-info-card" style="flex:0 0 auto; padding:8px;">
+      <img id="song-image" src="" alt="" style="width:80px;height:80px;border-radius:6px;object-fit:cover;display:none;">
+    </div>
     <div class="song-info-card">
       <div class="label">再生数</div>
       <div class="value" id="song-plays">-</div>

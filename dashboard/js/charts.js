@@ -255,97 +255,73 @@ function updateOverviewChart() {
   const metric = metricSelect.value;
   const metricLabel = metric === 'plays' ? '再生数' : 'いいね数';
   document.getElementById('overview-chart-title').textContent =
-    `${metricLabel}推移（積み上げエリア・上位10曲をハイライト）`;
+    `${metricLabel}ランキング（最新）`;
 
   const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
   const latestTs = timestamps[timestamps.length - 1];
   const latest = data.filter(d => d.timestamp === latestTs);
 
-  // 上位10曲を特定（選択中の指標でソート）
+  // 指標でソート（降順）
   latest.sort((a, b) => (parseInt(b[metric]) || 0) - (parseInt(a[metric]) || 0));
-  const top10Ids = latest.slice(0, 10).map(d => d.songId);
 
-  // 残りをまとめて「その他」にする
-  const otherIds = [...new Set(data.map(d => d.songId))].filter(id => !top10Ids.includes(id));
+  // 上位20曲を表示（多すぎると見にくい）
+  const display = latest.slice(0, 20);
 
-  // 上位10曲のデータセット
-  const datasets = top10Ids.map((songId, i) => {
-    const songData = data.filter(d => d.songId === songId);
-    const color = COLORS[i];
-    return {
-      label: songData[0]?.title || songId,
-      data: timestamps.map(ts => {
-        const entry = songData.find(d => d.timestamp === ts);
-        return { x: new Date(ts), y: entry ? (parseInt(entry[metric]) || 0) : 0 };
-      }),
-      borderColor: color,
-      backgroundColor: color + '60',
-      borderWidth: 1,
-      pointRadius: 0,
-      tension: 0.3,
-      fill: true,
-      stack: 'stack'
-    };
-  });
-
-  // 「その他」をまとめたデータセット
-  if (otherIds.length > 0) {
-    const otherData = timestamps.map(ts => {
-      let total = 0;
-      for (const songId of otherIds) {
-        const entry = data.find(d => d.songId === songId && d.timestamp === ts);
-        if (entry) total += parseInt(entry[metric]) || 0;
-      }
-      return { x: new Date(ts), y: total };
-    });
-    datasets.push({
-      label: `その他 (${otherIds.length}曲)`,
-      data: otherData,
-      borderColor: GRAY,
-      backgroundColor: GRAY + '40',
-      borderWidth: 1,
-      pointRadius: 0,
-      tension: 0.3,
-      fill: true,
-      stack: 'stack'
-    });
-  }
+  const labels = display.map(d => d.title);
+  const values = display.map(d => parseInt(d[metric]) || 0);
+  const bgColors = display.map((_, i) => i < 10 ? COLORS[i] + 'cc' : GRAY + '80');
+  const borderColors = display.map((_, i) => i < 10 ? COLORS[i] : GRAY);
 
   if (overviewChart) overviewChart.destroy();
   overviewChart = new Chart(document.getElementById('overview-chart'), {
-    type: 'line',
-    data: { datasets },
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
     options: {
+      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
       scales: {
         x: {
-          type: 'time',
-          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
-          grid: { color: '#222' },
-          ticks: { color: '#666' }
-        },
-        y: {
-          stacked: true,
           title: { display: true, text: metricLabel, color: '#666' },
           grid: { color: '#222' },
-          ticks: { color: '#666' }
+          ticks: {
+            color: '#666',
+            callback: (v) => v.toLocaleString()
+          }
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: '#ccc',
+            font: { size: 12 },
+            autoSkip: false
+          }
         }
       },
       plugins: {
-        legend: {
-          labels: {
-            color: '#ccc',
-            boxWidth: 12,
-            font: { size: 11 }
-          },
-          position: 'bottom'
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+            label: (ctx) => `${metricLabel}: ${ctx.parsed.x.toLocaleString()}`
           }
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const idx = elements[0].index;
+          const song = display[idx];
+          songSelect.value = song.songId;
+          updateSongDetail();
+          document.getElementById('song-info-row').scrollIntoView({ behavior: 'smooth' });
         }
       }
     }
@@ -380,6 +356,16 @@ function updateSongDetail() {
 
   const latest = songData.find(d => d.timestamp === latestTs);
   const prev = prevTs ? songData.find(d => d.timestamp === prevTs) : null;
+
+  // ジャケット画像
+  const songImg = document.getElementById('song-image');
+  if (latest.imageUrl) {
+    songImg.src = latest.imageUrl;
+    songImg.alt = latest.title;
+    songImg.style.display = 'block';
+  } else {
+    songImg.style.display = 'none';
+  }
 
   // 情報カード更新
   const plays = parseInt(latest.plays) || 0;

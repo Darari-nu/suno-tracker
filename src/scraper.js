@@ -30,7 +30,8 @@ async function fetchArtistViaAPI(page, handle) {
           songId: clip.id,
           plays: clip.play_count || 0,
           likes: clip.upvote_count || 0,
-          comments: clip.comment_count || 0
+          comments: clip.comment_count || 0,
+          imageUrl: clip.image_url || ''
         });
       }
     }
