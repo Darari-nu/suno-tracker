@@ -39,13 +39,16 @@ async function selectFilter(page, dropdownIndex, targetLabel) {
   await page.waitForTimeout(800);
 
   // ポップオーバー内のオプションをクリック
-  // cursor-pointer を持つdivで、テキストが完全一致するもの
+  // ドロップダウンリスト内でスクロールが必要な場合があるため、
+  // scrollIntoViewIfNeeded → click の順で操作
   const option = page.locator(`div.cursor-pointer:text-is("${targetLabel}")`).first();
-  if (await option.isVisible({ timeout: 3000 })) {
-    await option.click();
-  } else {
-    // フォールバック：テキスト部分一致
-    await page.locator(`text="${targetLabel}"`).first().click();
+  try {
+    await option.scrollIntoViewIfNeeded({ timeout: 3000 });
+    await option.click({ timeout: 3000 });
+  } catch (e) {
+    // フォールバック：force click
+    console.log(`[trend]   "${targetLabel}" のスクロール/クリックに失敗、forceクリック試行`);
+    await page.locator(`text="${targetLabel}"`).first().click({ force: true });
   }
   await page.waitForTimeout(2000);
 }
