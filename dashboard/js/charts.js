@@ -210,13 +210,15 @@ function updateSongOptions() {
 
   const current = songSelect.value;
   songSelect.innerHTML = '<option value="">曲を選択してください</option>';
+  let currentExists = false;
   for (const song of latest) {
     const opt = document.createElement('option');
     opt.value = song.songId;
     opt.textContent = `${song.title} (${song.artist}) - ${parseInt(song.plays || 0).toLocaleString()}再生`;
     songSelect.appendChild(opt);
+    if (song.songId === current) currentExists = true;
   }
-  songSelect.value = current;
+  songSelect.value = currentExists ? current : '';
 }
 
 function updateStats() {
@@ -253,7 +255,7 @@ function updateOverviewChart() {
   const metric = metricSelect.value;
   const metricLabel = metric === 'plays' ? '再生数' : 'いいね数';
   document.getElementById('overview-chart-title').textContent =
-    `${metricLabel}推移（上位10曲をハイライト）`;
+    `${metricLabel}推移（積み上げエリア・上位10曲をハイライト）`;
 
   const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
   const latestTs = timestamps[timestamps.length - 1];
@@ -263,32 +265,51 @@ function updateOverviewChart() {
   latest.sort((a, b) => (parseInt(b[metric]) || 0) - (parseInt(a[metric]) || 0));
   const top10Ids = latest.slice(0, 10).map(d => d.songId);
 
-  // 全曲のユニーク曲名
-  const songIds = [...new Set(data.map(d => d.songId))];
+  // 残りをまとめて「その他」にする
+  const otherIds = [...new Set(data.map(d => d.songId))].filter(id => !top10Ids.includes(id));
 
-  const datasets = songIds.map(songId => {
+  // 上位10曲のデータセット
+  const datasets = top10Ids.map((songId, i) => {
     const songData = data.filter(d => d.songId === songId);
-    const isTop = top10Ids.indexOf(songId);
-    const color = isTop >= 0 ? COLORS[isTop] : GRAY;
-
+    const color = COLORS[i];
     return {
       label: songData[0]?.title || songId,
       data: timestamps.map(ts => {
         const entry = songData.find(d => d.timestamp === ts);
-        return entry ? { x: new Date(ts), y: parseInt(entry[metric]) || 0 } : null;
-      }).filter(d => d),
+        return { x: new Date(ts), y: entry ? (parseInt(entry[metric]) || 0) : 0 };
+      }),
       borderColor: color,
-      backgroundColor: color + '20',
-      borderWidth: isTop >= 0 ? 2 : 1,
-      pointRadius: isTop >= 0 ? 1 : 0,
+      backgroundColor: color + '60',
+      borderWidth: 1,
+      pointRadius: 0,
       tension: 0.3,
-      order: isTop >= 0 ? 0 : 1,
-      hidden: false
+      fill: true,
+      stack: 'stack'
     };
   });
 
-  // 上位10曲を先に描画（order で制御してるが、念のためソート）
-  datasets.sort((a, b) => a.order - b.order);
+  // 「その他」をまとめたデータセット
+  if (otherIds.length > 0) {
+    const otherData = timestamps.map(ts => {
+      let total = 0;
+      for (const songId of otherIds) {
+        const entry = data.find(d => d.songId === songId && d.timestamp === ts);
+        if (entry) total += parseInt(entry[metric]) || 0;
+      }
+      return { x: new Date(ts), y: total };
+    });
+    datasets.push({
+      label: `その他 (${otherIds.length}曲)`,
+      data: otherData,
+      borderColor: GRAY,
+      backgroundColor: GRAY + '40',
+      borderWidth: 1,
+      pointRadius: 0,
+      tension: 0.3,
+      fill: true,
+      stack: 'stack'
+    });
+  }
 
   if (overviewChart) overviewChart.destroy();
   overviewChart = new Chart(document.getElementById('overview-chart'), {
@@ -297,7 +318,7 @@ function updateOverviewChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'nearest', intersect: false },
+      interaction: { mode: 'index', intersect: false },
       scales: {
         x: {
           type: 'time',
@@ -306,6 +327,7 @@ function updateOverviewChart() {
           ticks: { color: '#666' }
         },
         y: {
+          stacked: true,
           title: { display: true, text: metricLabel, color: '#666' },
           grid: { color: '#222' },
           ticks: { color: '#666' }
@@ -316,13 +338,14 @@ function updateOverviewChart() {
           labels: {
             color: '#ccc',
             boxWidth: 12,
-            font: { size: 11 },
-            filter: (item) => {
-              // 上位10曲のみレジェンドに表示
-              return item.datasetIndex < 10;
-            }
+            font: { size: 11 }
           },
           position: 'bottom'
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+          }
         }
       }
     }
