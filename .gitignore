@@ -1,0 +1,12 @@
+# 機密情報を含む設定ファイル
+config.json
+
+# Node.js
+node_modules/
+
+# テスト用一時ファイル
+test/*.png
+
+# OS
+.DS_Store
+Thumbs.db

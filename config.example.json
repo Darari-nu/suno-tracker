@@ -1,0 +1,39 @@
+{
+  "artists": [
+    {
+      "name": "darari_nu",
+      "url": "https://suno.com/@darari_nu?page=songs"
+    },
+    {
+      "name": "coban3137",
+      "url": "https://suno.com/@coban3137?page=songs"
+    }
+  ],
+  "trending": {
+    "url": "https://suno.com/explore/feed/trending",
+    "regions": ["Global", "Japanese"],
+    "periods": ["Now", "Weekly", "Monthly", "All Time"]
+  },
+  "schedule": {
+    "intervalHours": 3,
+    "dailyReportHour": 9
+  },
+  "data": {
+    "trendsFile": "trends.csv"
+  },
+  "notification": {
+    "discordWebhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN",
+    "enabled": false
+  },
+  "anomaly": {
+    "songCountDecreaseThreshold": 0,
+    "playCountDecreaseAllowed": false,
+    "staleDataMaxConsecutive": 8
+  },
+  "playwright": {
+    "headless": true,
+    "timeout": 30000,
+    "scrollDelay": 1000,
+    "maxScrollAttempts": 20
+  }
+}
