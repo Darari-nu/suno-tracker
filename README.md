@@ -10,13 +10,13 @@ https://darari-nu.github.io/suno-tracker/dashboard/
 
 ```
 GitHub Actions（3時間ごと）
-  ↓ SUNO API でアーティスト全曲データ取得
-  ↓ トレンドページをチェック（8パターン）
+  ↓ SUNO Profile API で全曲データ+フォロワー数取得
+  ↓ SUNO Discover API でトレンドチェック（8パターン）
   ↓ data/*.csv を更新 → 自動コミット＆プッシュ
   ↓ 異常検知時は Discord に通知
 
 GitHub Pages
-  ↓ dashboard/ を公開
+  ↓ dashboard/ を公開（ライトテーマ、Applify風デザイン）
   ↓ data/ のCSVを自動読み込み → グラフ表示
 ```
 
@@ -77,7 +77,8 @@ suno-tracker/
 │   ├── darari_nu.csv
 │   ├── coban3137.csv
 │   ├── trends.csv
-│   └── artists.json
+│   ├── followers.csv              # フォロワー推移
+│   └── artists.json               # アーティスト一覧（アバター・フォロワー数含む）
 ├── config.example.json            # 設定テンプレート
 └── docs/requirements.md           # 要件定義書
 ```
