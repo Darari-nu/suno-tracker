@@ -17,8 +17,6 @@ function parseCount(str) {
  * @param {number} dropdownIndex - 0=地域, 1=期間
  */
 async function selectFilter(page, dropdownIndex, targetLabel) {
-  // Trendingヘッダー直下のフィルターエリアにあるドロップダウンを取得
-  // inline-flex + cursor-pointer + min-w-20 のdivがドロップダウントリガー
   const selector = 'div.inline-flex.cursor-pointer.min-w-20';
   const triggers = page.locator(selector);
   const count = await triggers.count();
@@ -36,21 +34,63 @@ async function selectFilter(page, dropdownIndex, targetLabel) {
 
   // ドロップダウンを開く
   await trigger.click();
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1000);
 
-  // ポップオーバー内のオプションをクリック
-  // ドロップダウンリスト内でスクロールが必要な場合があるため、
-  // scrollIntoViewIfNeeded → click の順で操作
-  const option = page.locator(`div.cursor-pointer:text-is("${targetLabel}")`).first();
-  try {
-    await option.scrollIntoViewIfNeeded({ timeout: 3000 });
-    await option.click({ timeout: 3000 });
-  } catch (e) {
-    // フォールバック：force click
-    console.log(`[trend]   "${targetLabel}" のスクロール/クリックに失敗、forceクリック試行`);
-    await page.locator(`text="${targetLabel}"`).first().click({ force: true });
+  // page.evaluate でドロップダウン内のオプションを直接クリック
+  // オプションは div.font-sans.font-medium 内にテキストがある
+  const clicked = await page.evaluate((label) => {
+    // 方法1: font-sans font-medium クラスを持つ要素（SUNOのドロップダウンオプション）
+    const options = document.querySelectorAll('div.font-sans.font-medium');
+    for (const opt of options) {
+      if (opt.textContent.trim() === label &&
+          opt.offsetParent !== null &&
+          opt.children.length === 0) {
+        // 親のcursor-pointer要素をクリック（イベントリスナーが親にある場合）
+        const parent = opt.closest('.cursor-pointer');
+        if (parent) {
+          parent.click();
+          return 'parent-click';
+        }
+        opt.click();
+        return 'direct-click';
+      }
+    }
+
+    // 方法2: テキスト完全一致で cursor-pointer 内の子要素
+    const cursorDivs = document.querySelectorAll('div.cursor-pointer');
+    for (const div of cursorDivs) {
+      const children = div.querySelectorAll('div');
+      for (const child of children) {
+        if (child.textContent.trim() === label &&
+            child.children.length === 0 &&
+            child.offsetParent !== null) {
+          div.click();
+          return 'nested-click';
+        }
+      }
+    }
+
+    return null;
+  }, targetLabel);
+
+  if (clicked) {
+    console.log(`[trend]   "${targetLabel}" 選択成功 (${clicked})`);
+  } else {
+    // 最終フォールバック: Playwright のテキストセレクタ
+    console.log(`[trend]   "${targetLabel}" evaluate失敗、Playwrightフォールバック`);
+    try {
+      await page.locator(`text="${targetLabel}"`).first().click({ force: true, timeout: 3000 });
+    } catch (e) {
+      console.error(`[trend]   "${targetLabel}" 選択に完全失敗`);
+    }
   }
   await page.waitForTimeout(2000);
+
+  // フィルターが変わったか確認
+  const newLabel = await trigger.locator('span.line-clamp-1').innerText();
+  if (newLabel !== targetLabel) {
+    console.warn(`[trend]   フィルター未変更: "${newLabel}" (期待: "${targetLabel}")`);
+  }
 }
 
 /**
@@ -128,6 +168,7 @@ async function checkTrending(page, region, period, artistSongIds) {
 
   // 現在のトレンド曲を取得
   const trendSongs = await getCurrentTrendSongs(page);
+  console.log(`[trend]   ${region}/${period}: ${trendSongs.length}曲取得`);
 
   // 対象アーティストの曲がランクインしているか確認
   const matches = [];
@@ -229,18 +270,18 @@ if (require.main === module) {
     darari_nu: {
       success: true,
       songs: [
-        { songId: '2c2b8df8-af37-4b91-b0b6-98bb9dcc0759' }, // テンセグリティ
-        { songId: 'e389d0aa-1acf-48d3-930c-2bca08b4613c' }, // ブリキ男
-        { songId: 'd3c0c370-3efc-46ed-89f7-9ec14f5248af' }, // 雪泥
-        { songId: 'a0dd7606-0a87-4312-9fef-34ccef5a52e6' }, // LIFE
-        { songId: 'b611d79e-6a38-4c7b-9999-036078b08ed7' }, // 蹄
-        { songId: '838a4082-03fb-4386-a5f3-61adef134444' }, // 錯乱
+        { songId: '2c2b8df8-af37-4b91-b0b6-98bb9dcc0759' },
+        { songId: 'e389d0aa-1acf-48d3-930c-2bca08b4613c' },
+        { songId: 'd3c0c370-3efc-46ed-89f7-9ec14f5248af' },
+        { songId: 'a0dd7606-0a87-4312-9fef-34ccef5a52e6' },
+        { songId: 'b611d79e-6a38-4c7b-9999-036078b08ed7' },
+        { songId: '838a4082-03fb-4386-a5f3-61adef134444' },
       ]
     },
     coban3137: {
       success: true,
       songs: [
-        { songId: '5e3c16fd-7d17-4bb6-86e3-9d0fc7eeb4d5' }, // BINARY (ダミーID)
+        { songId: '79cf91bc-167e-481f-9a49-b581919560c4' }, // BINARY
       ]
     }
   };
