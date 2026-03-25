@@ -1,9 +1,11 @@
 // === データ管理 ===
 let songsData = [];
 let trendsData = [];
-let playsChart = null;
-let likesChart = null;
-let trendImpactChart = null;
+let overviewChart = null;
+let songPlaysChart = null;
+let songLikesChart = null;
+let tableSortKey = 'plays';
+let tableSortAsc = false;
 
 // === CSV パーサー ===
 function parseCSV(text) {
@@ -59,12 +61,9 @@ function handleFiles(files) {
       const text = e.target.result;
       if (file.name.includes('trends')) {
         trendsData = parseCSV(text);
-        console.log(`trends.csv: ${trendsData.length}行読み込み`);
       } else if (file.name.endsWith('.csv')) {
-        // アーティスト別CSVを結合
         const parsed = parseCSV(text);
         songsData = songsData.concat(parsed);
-        console.log(`${file.name}: ${parsed.length}行読み込み (累計: ${songsData.length})`);
       }
       updateDashboard();
     };
@@ -76,12 +75,10 @@ function handleFiles(files) {
 // === 自動読み込み（GitHub Pages 用：相対パスCSV） ===
 async function loadFromCSV() {
   try {
-    // artists.json からアーティスト一覧を取得
     const artistsRes = await fetch('../data/artists.json');
     if (!artistsRes.ok) throw new Error('artists.json not found');
     const artists = await artistsRes.json();
 
-    // 各アーティストのCSVを読み込み
     const allSongs = [];
     for (const artist of artists) {
       try {
@@ -90,7 +87,6 @@ async function loadFromCSV() {
           const text = await res.text();
           const parsed = parseCSV(text);
           allSongs.push(...parsed);
-          console.log(`${artist}.csv: ${parsed.length}行読み込み`);
         }
       } catch (e) {
         console.warn(`${artist}.csv 読み込み失敗:`, e.message);
@@ -98,13 +94,11 @@ async function loadFromCSV() {
     }
     songsData = allSongs;
 
-    // trends.csv を読み込み
     try {
       const trendsRes = await fetch('../data/trends.csv');
       if (trendsRes.ok) {
         const text = await trendsRes.text();
         trendsData = parseCSV(text);
-        console.log(`trends.csv: ${trendsData.length}行読み込み`);
       }
     } catch (e) {
       console.warn('trends.csv 読み込み失敗:', e.message);
@@ -116,7 +110,7 @@ async function loadFromCSV() {
       return true;
     }
   } catch (e) {
-    console.log('CSV自動読み込み失敗（手動アップロードを使用）:', e.message);
+    console.log('CSV自動読み込み失敗:', e.message);
   }
   return false;
 }
@@ -128,14 +122,8 @@ async function loadFromAPI() {
       fetch('/api/songs'),
       fetch('/api/trends')
     ]);
-    if (songsRes.ok) {
-      songsData = await songsRes.json();
-      console.log(`API: songs ${songsData.length}行読み込み`);
-    }
-    if (trendsRes.ok) {
-      trendsData = await trendsRes.json();
-      console.log(`API: trends ${trendsData.length}行読み込み`);
-    }
+    if (songsRes.ok) songsData = await songsRes.json();
+    if (trendsRes.ok) trendsData = await trendsRes.json();
     if (songsData.length > 0) {
       fileInputArea.style.display = 'none';
       updateDashboard();
@@ -147,7 +135,7 @@ async function loadFromAPI() {
   return false;
 }
 
-// ページ読み込み時に自動読み込みを試行（CSV → API → 手動アップロード）
+// ページ読み込み時
 (async () => {
   const loaded = await loadFromCSV();
   if (!loaded) await loadFromAPI();
@@ -157,21 +145,25 @@ async function loadFromAPI() {
 const artistSelect = document.getElementById('artist-select');
 const metricSelect = document.getElementById('metric-select');
 const periodSelect = document.getElementById('period-select');
+const songSelect = document.getElementById('song-select');
 
 [artistSelect, metricSelect, periodSelect].forEach(el => {
-  el.addEventListener('change', updateDashboard);
+  el.addEventListener('change', () => {
+    updateDashboard();
+  });
+});
+
+songSelect.addEventListener('change', () => {
+  updateSongDetail();
 });
 
 function getFilteredData() {
   const artist = artistSelect.value;
   const period = periodSelect.value;
-
   let filtered = songsData;
-
   if (artist !== 'all') {
     filtered = filtered.filter(d => d.artist === artist);
   }
-
   if (period !== 'all') {
     const cutoff = new Date();
     if (period === '24h') cutoff.setHours(cutoff.getHours() - 24);
@@ -179,16 +171,16 @@ function getFilteredData() {
     else if (period === '30d') cutoff.setDate(cutoff.getDate() - 30);
     filtered = filtered.filter(d => new Date(d.timestamp) >= cutoff);
   }
-
   return filtered;
 }
 
 // === ダッシュボード更新 ===
 function updateDashboard() {
   updateArtistOptions();
+  updateSongOptions();
   updateStats();
-  updateCharts();
-  updateTrendImpactChart();
+  updateOverviewChart();
+  updateSongDetail();
   updateSongsTable();
   updateTrendsTable();
   document.getElementById('stats-row').style.display = 'flex';
@@ -207,11 +199,30 @@ function updateArtistOptions() {
   artistSelect.value = current;
 }
 
+function updateSongOptions() {
+  const data = getFilteredData();
+  const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
+  const latestTs = timestamps[timestamps.length - 1];
+  const latest = data.filter(d => d.timestamp === latestTs);
+
+  // 再生数順でソート
+  latest.sort((a, b) => (parseInt(b.plays) || 0) - (parseInt(a.plays) || 0));
+
+  const current = songSelect.value;
+  songSelect.innerHTML = '<option value="">曲を選択してください</option>';
+  for (const song of latest) {
+    const opt = document.createElement('option');
+    opt.value = song.songId;
+    opt.textContent = `${song.title} (${song.artist}) - ${parseInt(song.plays || 0).toLocaleString()}再生`;
+    songSelect.appendChild(opt);
+  }
+  songSelect.value = current;
+}
+
 function updateStats() {
   const data = getFilteredData();
   if (data.length === 0) return;
 
-  // 最新タイムスタンプのデータ
   const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
   const latestTs = timestamps[timestamps.length - 1];
   const latest = data.filter(d => d.timestamp === latestTs);
@@ -224,80 +235,233 @@ function updateStats() {
   document.getElementById('stat-likes').textContent = totalLikes.toLocaleString();
   document.getElementById('stat-songs').textContent = songCount;
 
-  // トレンドランクイン数
   const trendMatches = trendsData.filter(d => d.artist !== '-').length;
   document.getElementById('stat-trending').textContent = trendMatches;
 }
 
-// === グラフ ===
+// === 総合チャート ===
 const COLORS = [
   '#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16',
-  '#06b6d4', '#e11d48', '#10b981', '#d97706', '#7c3aed',
-  '#be185d', '#0d9488', '#ea580c', '#4f46e5', '#65a30d',
-  '#0891b2', '#9f1239', '#059669', '#b45309', '#6d28d9',
-  '#a21caf', '#0f766e', '#c2410c', '#4338ca', '#4d7c0f',
-  '#0e7490', '#881337', '#047857', '#92400e', '#5b21b6'
+  '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
 ];
+const GRAY = '#444';
 
-function updateCharts() {
+function updateOverviewChart() {
   const data = getFilteredData();
   if (data.length === 0) return;
 
-  // タイムスタンプごと・曲ごとにグループ化
-  const songNames = [...new Set(data.map(d => d.title))];
+  const metric = metricSelect.value;
+  const metricLabel = metric === 'plays' ? '再生数' : 'いいね数';
+  document.getElementById('overview-chart-title').textContent =
+    `${metricLabel}推移（上位10曲をハイライト）`;
+
   const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
+  const latestTs = timestamps[timestamps.length - 1];
+  const latest = data.filter(d => d.timestamp === latestTs);
 
-  // 再生数チャート
-  const playsDatasets = songNames.map((song, i) => {
-    const songData = data.filter(d => d.title === song);
+  // 上位10曲を特定（選択中の指標でソート）
+  latest.sort((a, b) => (parseInt(b[metric]) || 0) - (parseInt(a[metric]) || 0));
+  const top10Ids = latest.slice(0, 10).map(d => d.songId);
+
+  // 全曲のユニーク曲名
+  const songIds = [...new Set(data.map(d => d.songId))];
+
+  const datasets = songIds.map(songId => {
+    const songData = data.filter(d => d.songId === songId);
+    const isTop = top10Ids.indexOf(songId);
+    const color = isTop >= 0 ? COLORS[isTop] : GRAY;
+
     return {
-      label: song,
+      label: songData[0]?.title || songId,
       data: timestamps.map(ts => {
         const entry = songData.find(d => d.timestamp === ts);
-        return entry ? { x: new Date(ts), y: parseInt(entry.plays) || 0 } : null;
+        return entry ? { x: new Date(ts), y: parseInt(entry[metric]) || 0 } : null;
       }).filter(d => d),
-      borderColor: COLORS[i % COLORS.length],
-      backgroundColor: COLORS[i % COLORS.length] + '20',
-      borderWidth: 2,
-      pointRadius: 1,
-      tension: 0.3
+      borderColor: color,
+      backgroundColor: color + '20',
+      borderWidth: isTop >= 0 ? 2 : 1,
+      pointRadius: isTop >= 0 ? 1 : 0,
+      tension: 0.3,
+      order: isTop >= 0 ? 0 : 1,
+      hidden: false
     };
   });
 
-  if (playsChart) playsChart.destroy();
-  playsChart = new Chart(document.getElementById('plays-chart'), {
-    type: 'line',
-    data: { datasets: playsDatasets },
-    options: chartOptions('再生数')
-  });
+  // 上位10曲を先に描画（order で制御してるが、念のためソート）
+  datasets.sort((a, b) => a.order - b.order);
 
-  // いいねチャート
-  const likesDatasets = songNames.map((song, i) => {
-    const songData = data.filter(d => d.title === song);
-    return {
-      label: song,
-      data: timestamps.map(ts => {
-        const entry = songData.find(d => d.timestamp === ts);
-        return entry ? { x: new Date(ts), y: parseInt(entry.likes) || 0 } : null;
-      }).filter(d => d),
-      borderColor: COLORS[i % COLORS.length],
-      backgroundColor: COLORS[i % COLORS.length] + '20',
-      borderWidth: 2,
-      pointRadius: 1,
-      tension: 0.3
-    };
-  });
-
-  if (likesChart) likesChart.destroy();
-  likesChart = new Chart(document.getElementById('likes-chart'), {
+  if (overviewChart) overviewChart.destroy();
+  overviewChart = new Chart(document.getElementById('overview-chart'), {
     type: 'line',
-    data: { datasets: likesDatasets },
-    options: chartOptions('いいね数')
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          type: 'time',
+          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
+          grid: { color: '#222' },
+          ticks: { color: '#666' }
+        },
+        y: {
+          title: { display: true, text: metricLabel, color: '#666' },
+          grid: { color: '#222' },
+          ticks: { color: '#666' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#ccc',
+            boxWidth: 12,
+            font: { size: 11 },
+            filter: (item) => {
+              // 上位10曲のみレジェンドに表示
+              return item.datasetIndex < 10;
+            }
+          },
+          position: 'bottom'
+        }
+      }
+    }
   });
 }
 
-function chartOptions(yLabel) {
+// === 曲別詳細 ===
+function updateSongDetail() {
+  const selectedId = songSelect.value;
+  const placeholder = document.getElementById('song-detail-placeholder');
+  const chartsArea = document.getElementById('song-detail-charts');
+  const infoRow = document.getElementById('song-info-row');
+
+  if (!selectedId) {
+    placeholder.style.display = 'block';
+    chartsArea.style.display = 'none';
+    infoRow.style.display = 'none';
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  chartsArea.style.display = 'block';
+  infoRow.style.display = 'flex';
+
+  const data = getFilteredData();
+  const songData = data.filter(d => d.songId === selectedId);
+  if (songData.length === 0) return;
+
+  const timestamps = [...new Set(songData.map(d => d.timestamp))].sort();
+  const latestTs = timestamps[timestamps.length - 1];
+  const prevTs = timestamps.length >= 2 ? timestamps[timestamps.length - 2] : null;
+
+  const latest = songData.find(d => d.timestamp === latestTs);
+  const prev = prevTs ? songData.find(d => d.timestamp === prevTs) : null;
+
+  // 情報カード更新
+  const plays = parseInt(latest.plays) || 0;
+  const likes = parseInt(latest.likes) || 0;
+  const comments = parseInt(latest.comments) || 0;
+  const likeRate = plays > 0 ? ((likes / plays) * 100).toFixed(1) : '0.0';
+
+  document.getElementById('song-plays').textContent = plays.toLocaleString();
+  document.getElementById('song-likes').textContent = likes.toLocaleString();
+  document.getElementById('song-like-rate').textContent = likeRate + '%';
+  document.getElementById('song-comments').textContent = comments.toLocaleString();
+
+  // 前回比
+  if (prev) {
+    const playsDiff = plays - (parseInt(prev.plays) || 0);
+    const likesDiff = likes - (parseInt(prev.likes) || 0);
+    document.getElementById('song-plays-diff').innerHTML = formatDiffSmall(playsDiff);
+    document.getElementById('song-likes-diff').innerHTML = formatDiffSmall(likesDiff);
+  } else {
+    document.getElementById('song-plays-diff').textContent = '';
+    document.getElementById('song-likes-diff').textContent = '';
+  }
+
+  // トレンド状態
+  const songTrends = trendsData.filter(d => d.songId === selectedId && d.artist !== '-');
+  if (songTrends.length > 0) {
+    const latestTrend = songTrends.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+    document.getElementById('song-trend-status').innerHTML =
+      `<span style="color:#f59e0b;">${latestTrend.region}/${latestTrend.period} ${latestTrend.rank}位</span>`;
+  } else {
+    document.getElementById('song-trend-status').textContent = 'なし';
+  }
+
+  // トレンドのアノテーション
+  const annotations = {};
+  songTrends.forEach((match, idx) => {
+    const ts = new Date(match.timestamp);
+    annotations[`trend_${idx}`] = {
+      type: 'line',
+      xMin: ts,
+      xMax: ts,
+      borderColor: '#f59e0b88',
+      borderWidth: 2,
+      borderDash: [4, 4],
+      label: {
+        display: true,
+        content: `${match.region}/${match.period} ${match.rank}位`,
+        position: 'start',
+        backgroundColor: '#f59e0b33',
+        color: '#f59e0b',
+        font: { size: 10 },
+        padding: 3
+      }
+    };
+  });
+
+  const songTitle = latest.title;
+  const color = '#3b82f6';
+
+  // 再生数チャート
+  const playsDataset = {
+    label: songTitle,
+    data: timestamps.map(ts => {
+      const entry = songData.find(d => d.timestamp === ts);
+      return entry ? { x: new Date(ts), y: parseInt(entry.plays) || 0 } : null;
+    }).filter(d => d),
+    borderColor: color,
+    backgroundColor: color + '20',
+    borderWidth: 2,
+    pointRadius: 2,
+    tension: 0.3,
+    fill: true
+  };
+
+  if (songPlaysChart) songPlaysChart.destroy();
+  songPlaysChart = new Chart(document.getElementById('song-plays-chart'), {
+    type: 'line',
+    data: { datasets: [playsDataset] },
+    options: songChartOptions('再生数', annotations)
+  });
+
+  // いいねチャート
+  const likesDataset = {
+    label: songTitle,
+    data: timestamps.map(ts => {
+      const entry = songData.find(d => d.timestamp === ts);
+      return entry ? { x: new Date(ts), y: parseInt(entry.likes) || 0 } : null;
+    }).filter(d => d),
+    borderColor: '#ec4899',
+    backgroundColor: '#ec489920',
+    borderWidth: 2,
+    pointRadius: 2,
+    tension: 0.3,
+    fill: true
+  };
+
+  if (songLikesChart) songLikesChart.destroy();
+  songLikesChart = new Chart(document.getElementById('song-likes-chart'), {
+    type: 'line',
+    data: { datasets: [likesDataset] },
+    options: songChartOptions('いいね数', annotations)
+  });
+}
+
+function songChartOptions(yLabel, annotations) {
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -319,114 +483,30 @@ function chartOptions(yLabel) {
       legend: {
         labels: { color: '#ccc', boxWidth: 12, font: { size: 11 } },
         position: 'bottom'
-      }
+      },
+      annotation: { annotations }
     }
   };
 }
 
-// === トレンドインパクトチャート ===
-function updateTrendImpactChart() {
-  const data = getFilteredData();
-  if (data.length === 0) return;
-
-  // トレンドにランクインした曲のみ対象
-  const trendMatches = trendsData.filter(d => d.artist && d.artist !== '-');
-  const trendedSongIds = [...new Set(trendMatches.map(d => d.songId))];
-
-  if (trendedSongIds.length === 0) {
-    // トレンドデータがない場合はグラフをクリア
-    if (trendImpactChart) trendImpactChart.destroy();
-    trendImpactChart = null;
-    return;
-  }
-
-  // トレンドにランクインした曲の再生数推移データセット
-  const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
-  const datasets = [];
-  let colorIdx = 0;
-
-  for (const songId of trendedSongIds) {
-    const songData = data.filter(d => d.songId === songId);
-    if (songData.length === 0) continue;
-
-    const songTitle = songData[0].title;
-    const artist = songData[0].artist;
-    const color = COLORS[colorIdx % COLORS.length];
-    colorIdx++;
-
-    // 再生数の推移ライン
-    datasets.push({
-      label: `${songTitle} (${artist})`,
-      data: timestamps.map(ts => {
-        const entry = songData.find(d => d.timestamp === ts);
-        return entry ? { x: new Date(ts), y: parseInt(entry.plays) || 0 } : null;
-      }).filter(d => d),
-      borderColor: color,
-      backgroundColor: color + '20',
-      borderWidth: 2,
-      pointRadius: 1,
-      tension: 0.3,
-      yAxisID: 'y'
+// === テーブル ===
+function setupTableSort() {
+  const headers = document.querySelectorAll('#songs-table th[data-sort]');
+  headers.forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      if (tableSortKey === key) {
+        tableSortAsc = !tableSortAsc;
+      } else {
+        tableSortKey = key;
+        tableSortAsc = false;
+      }
+      updateSongsTable();
     });
-  }
-
-  // トレンドランクインのアノテーション用データセット（縦線）
-  const annotations = {};
-  trendMatches.forEach((match, idx) => {
-    const ts = new Date(match.timestamp);
-    const key = `trend_${idx}`;
-    annotations[key] = {
-      type: 'line',
-      xMin: ts,
-      xMax: ts,
-      borderColor: '#f59e0b88',
-      borderWidth: 2,
-      borderDash: [4, 4],
-      label: {
-        display: true,
-        content: `${match.title} ${match.region}/${match.period} ${match.rank}位`,
-        position: 'start',
-        backgroundColor: '#f59e0b33',
-        color: '#f59e0b',
-        font: { size: 10 },
-        padding: 3
-      }
-    };
-  });
-
-  if (trendImpactChart) trendImpactChart.destroy();
-  trendImpactChart = new Chart(document.getElementById('trend-impact-chart'), {
-    type: 'line',
-    data: { datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'nearest', intersect: false },
-      scales: {
-        x: {
-          type: 'time',
-          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
-          grid: { color: '#222' },
-          ticks: { color: '#666' }
-        },
-        y: {
-          title: { display: true, text: '再生数', color: '#666' },
-          grid: { color: '#222' },
-          ticks: { color: '#666' }
-        }
-      },
-      plugins: {
-        legend: {
-          labels: { color: '#ccc', boxWidth: 12, font: { size: 11 } },
-          position: 'bottom'
-        },
-        annotation: { annotations }
-      }
-    }
   });
 }
+setupTableSort();
 
-// === テーブル ===
 function updateSongsTable() {
   const data = getFilteredData();
   if (data.length === 0) return;
@@ -435,27 +515,74 @@ function updateSongsTable() {
   const latestTs = timestamps[timestamps.length - 1];
   const prevTs = timestamps.length >= 2 ? timestamps[timestamps.length - 2] : null;
 
-  const latest = data.filter(d => d.timestamp === latestTs);
+  let latest = data.filter(d => d.timestamp === latestTs);
   const prev = prevTs ? data.filter(d => d.timestamp === prevTs) : [];
+
+  // いいね率を計算して付与
+  latest = latest.map(song => {
+    const plays = parseInt(song.plays) || 0;
+    const likes = parseInt(song.likes) || 0;
+    const prevSong = prev.find(p => p.songId === song.songId);
+    const playsDiff = prevSong ? plays - (parseInt(prevSong.plays) || 0) : 0;
+    return {
+      ...song,
+      playsNum: plays,
+      likesNum: likes,
+      commentsNum: parseInt(song.comments) || 0,
+      likeRate: plays > 0 ? (likes / plays) * 100 : 0,
+      playsDiff
+    };
+  });
+
+  // ソート
+  const sortFn = (a, b) => {
+    let va, vb;
+    switch (tableSortKey) {
+      case 'title': va = a.title; vb = b.title; break;
+      case 'artist': va = a.artist; vb = b.artist; break;
+      case 'plays': va = a.playsNum; vb = b.playsNum; break;
+      case 'likes': va = a.likesNum; vb = b.likesNum; break;
+      case 'likeRate': va = a.likeRate; vb = b.likeRate; break;
+      case 'comments': va = a.commentsNum; vb = b.commentsNum; break;
+      case 'diff': va = a.playsDiff; vb = b.playsDiff; break;
+      default: va = a.playsNum; vb = b.playsNum;
+    }
+    if (typeof va === 'string') {
+      return tableSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    }
+    return tableSortAsc ? va - vb : vb - va;
+  };
+  latest.sort(sortFn);
+
+  // ソートアイコン更新
+  document.querySelectorAll('#songs-table th[data-sort] .sort-icon').forEach(icon => {
+    const key = icon.parentElement.dataset.sort;
+    if (key === tableSortKey) {
+      icon.textContent = tableSortAsc ? '▲' : '▼';
+    } else {
+      icon.textContent = '';
+    }
+  });
 
   const tbody = document.querySelector('#songs-table tbody');
   tbody.innerHTML = '';
 
-  // 再生数でソート
-  latest.sort((a, b) => (parseInt(b.plays) || 0) - (parseInt(a.plays) || 0));
-
   for (const song of latest) {
-    const prevSong = prev.find(p => p.songId === song.songId);
-    const playsDiff = prevSong ? (parseInt(song.plays) || 0) - (parseInt(prevSong.plays) || 0) : 0;
-
     const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', () => {
+      songSelect.value = song.songId;
+      updateSongDetail();
+      document.getElementById('song-info-row').scrollIntoView({ behavior: 'smooth' });
+    });
     tr.innerHTML = `
       <td>${escapeHtml(song.title)}</td>
       <td>${escapeHtml(song.artist)}</td>
-      <td class="num">${parseInt(song.plays || 0).toLocaleString()}</td>
-      <td class="num">${parseInt(song.likes || 0).toLocaleString()}</td>
-      <td class="num">${parseInt(song.comments || 0).toLocaleString()}</td>
-      <td class="num">${formatDiff(playsDiff)}</td>
+      <td class="num">${song.playsNum.toLocaleString()}</td>
+      <td class="num">${song.likesNum.toLocaleString()}</td>
+      <td class="num">${song.likeRate.toFixed(1)}%</td>
+      <td class="num">${song.commentsNum.toLocaleString()}</td>
+      <td class="num">${formatDiff(song.playsDiff)}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -493,6 +620,12 @@ function formatDiff(diff) {
   if (diff > 0) return `<span class="trend-badge trend-up">+${diff.toLocaleString()}</span>`;
   if (diff < 0) return `<span class="trend-badge trend-down">${diff.toLocaleString()}</span>`;
   return `<span class="trend-badge trend-same">-</span>`;
+}
+
+function formatDiffSmall(diff) {
+  if (diff > 0) return `<span style="color:#34d399;">+${diff.toLocaleString()}</span>`;
+  if (diff < 0) return `<span style="color:#fca5a5;">${diff.toLocaleString()}</span>`;
+  return '';
 }
 
 function escapeHtml(str) {
