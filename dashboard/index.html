@@ -6,6 +6,7 @@
   <title>SUNO Tracker Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -170,6 +171,16 @@
       <h2>いいね推移</h2>
       <div class="chart-container">
         <canvas id="likes-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns: 1fr;">
+    <div class="card">
+      <h2>再生数 × トレンドランクイン</h2>
+      <p style="font-size:12px;color:#666;margin-bottom:8px;">縦線 = トレンドランクインした瞬間。ランクイン後に再生数がどう伸びるかを可視化</p>
+      <div class="chart-container" style="height:400px;">
+        <canvas id="trend-impact-chart"></canvas>
       </div>
     </div>
   </div>

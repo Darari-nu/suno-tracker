@@ -3,6 +3,7 @@ let songsData = [];
 let trendsData = [];
 let playsChart = null;
 let likesChart = null;
+let trendImpactChart = null;
 
 // === CSV パーサー ===
 function parseCSV(text) {
@@ -187,6 +188,7 @@ function updateDashboard() {
   updateArtistOptions();
   updateStats();
   updateCharts();
+  updateTrendImpactChart();
   updateSongsTable();
   updateTrendsTable();
   document.getElementById('stats-row').style.display = 'flex';
@@ -320,6 +322,108 @@ function chartOptions(yLabel) {
       }
     }
   };
+}
+
+// === トレンドインパクトチャート ===
+function updateTrendImpactChart() {
+  const data = getFilteredData();
+  if (data.length === 0) return;
+
+  // トレンドにランクインした曲のみ対象
+  const trendMatches = trendsData.filter(d => d.artist && d.artist !== '-');
+  const trendedSongIds = [...new Set(trendMatches.map(d => d.songId))];
+
+  if (trendedSongIds.length === 0) {
+    // トレンドデータがない場合はグラフをクリア
+    if (trendImpactChart) trendImpactChart.destroy();
+    trendImpactChart = null;
+    return;
+  }
+
+  // トレンドにランクインした曲の再生数推移データセット
+  const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
+  const datasets = [];
+  let colorIdx = 0;
+
+  for (const songId of trendedSongIds) {
+    const songData = data.filter(d => d.songId === songId);
+    if (songData.length === 0) continue;
+
+    const songTitle = songData[0].title;
+    const artist = songData[0].artist;
+    const color = COLORS[colorIdx % COLORS.length];
+    colorIdx++;
+
+    // 再生数の推移ライン
+    datasets.push({
+      label: `${songTitle} (${artist})`,
+      data: timestamps.map(ts => {
+        const entry = songData.find(d => d.timestamp === ts);
+        return entry ? { x: new Date(ts), y: parseInt(entry.plays) || 0 } : null;
+      }).filter(d => d),
+      borderColor: color,
+      backgroundColor: color + '20',
+      borderWidth: 2,
+      pointRadius: 1,
+      tension: 0.3,
+      yAxisID: 'y'
+    });
+  }
+
+  // トレンドランクインのアノテーション用データセット（縦線）
+  const annotations = {};
+  trendMatches.forEach((match, idx) => {
+    const ts = new Date(match.timestamp);
+    const key = `trend_${idx}`;
+    annotations[key] = {
+      type: 'line',
+      xMin: ts,
+      xMax: ts,
+      borderColor: '#f59e0b88',
+      borderWidth: 2,
+      borderDash: [4, 4],
+      label: {
+        display: true,
+        content: `${match.title} ${match.region}/${match.period} ${match.rank}位`,
+        position: 'start',
+        backgroundColor: '#f59e0b33',
+        color: '#f59e0b',
+        font: { size: 10 },
+        padding: 3
+      }
+    };
+  });
+
+  if (trendImpactChart) trendImpactChart.destroy();
+  trendImpactChart = new Chart(document.getElementById('trend-impact-chart'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          type: 'time',
+          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
+          grid: { color: '#222' },
+          ticks: { color: '#666' }
+        },
+        y: {
+          title: { display: true, text: '再生数', color: '#666' },
+          grid: { color: '#222' },
+          ticks: { color: '#666' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#ccc', boxWidth: 12, font: { size: 11 } },
+          position: 'bottom'
+        },
+        annotation: { annotations }
+      }
+    }
+  });
 }
 
 // === テーブル ===
