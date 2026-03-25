@@ -1,6 +1,6 @@
 const { scrapeAllArtists } = require('./scraper');
 const { checkAllTrends } = require('./trend-checker');
-const { saveSongsData, saveTrendsData, getLastSongsData, saveArtistsList } = require('./csv-store');
+const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList } = require('./csv-store');
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
 const config = require('../config.json');
@@ -33,6 +33,7 @@ async function main() {
   console.log('\n[4/6] データを保存中...');
   const savedSongs = saveSongsData(artistData);
   const savedTrends = saveTrendsData(trendResults);
+  const savedFollowers = saveFollowersData(artistData);
   saveArtistsList(artistData);
 
   // Step 5: 異常検知
@@ -61,6 +62,7 @@ async function main() {
   console.log(`\n========================================`);
   console.log(`実行完了 (${elapsed}秒)`);
   console.log(`  曲データ: ${savedSongs}件保存`);
+  console.log(`  フォロワー: ${savedFollowers}件保存`);
   console.log(`  トレンド: ${savedTrends}件保存`);
   console.log(`  異常: ${anomalies.length}件`);
 

@@ -10,6 +10,7 @@ async function fetchArtistViaAPI(page, handle) {
   let pageNum = 1;
   let totalClips = 0;
   let avatarUrl = '';
+  let stats = null;
 
   while (true) {
     const url = `https://studio-api-prod.suno.com/api/profiles/${handle}?playlists_sort_by=upvote_count&clips_sort_by=created_at&page=${pageNum}`;
@@ -23,6 +24,9 @@ async function fetchArtistViaAPI(page, handle) {
     const clips = result.clips || [];
     if (!avatarUrl && clips.length > 0 && clips[0].avatar_image_url) {
       avatarUrl = clips[0].avatar_image_url;
+    }
+    if (!stats && result.stats) {
+      stats = result.stats;
     }
 
     for (const clip of clips) {
@@ -51,6 +55,7 @@ async function fetchArtistViaAPI(page, handle) {
   }
 
   allClips.avatarUrl = avatarUrl;
+  allClips.stats = stats || {};
   return allClips;
 }
 
@@ -151,7 +156,9 @@ async function scrapeAllArtists() {
           success: true,
           songCount: songs.length,
           method: 'api',
-          avatarUrl: songs.avatarUrl || ''
+          avatarUrl: songs.avatarUrl || '',
+          followers: songs.stats?.followers_count || 0,
+          following: songs.stats?.following_count || 0
         };
         console.log(`[scraper] ${handle}: ${songs.length} 曲取得完了 (API)`);
         continue;

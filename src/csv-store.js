@@ -8,6 +8,8 @@ const TRENDS_FILE = path.join(DATA_DIR, config.data.trendsFile || 'trends.csv');
 
 const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments,imageUrl,createdAt';
 const TRENDS_HEADER = 'timestamp,region,period,artist,songId,title,rank,plays,likes';
+const FOLLOWERS_HEADER = 'timestamp,artist,followers,following';
+const FOLLOWERS_FILE = path.join(DATA_DIR, 'followers.csv');
 
 /**
  * CSVの値をエスケープする
@@ -92,7 +94,9 @@ function saveSongsData(artistData) {
 function saveArtistsList(artistData) {
   const artists = Object.entries(artistData).map(([name, data]) => ({
     name,
-    avatar: data.avatarUrl || ''
+    avatar: data.avatarUrl || '',
+    followers: data.followers || 0,
+    following: data.following || 0
   }));
   const filePath = path.join(DATA_DIR, 'artists.json');
 
@@ -102,6 +106,31 @@ function saveArtistsList(artistData) {
 
   fs.writeFileSync(filePath, JSON.stringify(artists, null, 2), 'utf-8');
   console.log(`[csv] artists.json 更新: ${artists.map(a => a.name).join(', ')}`);
+}
+
+/**
+ * フォロワー数をCSVに追記する
+ */
+function saveFollowersData(artistData) {
+  ensureFile(FOLLOWERS_FILE, FOLLOWERS_HEADER);
+
+  const lines = [];
+  for (const [artistName, data] of Object.entries(artistData)) {
+    if (!data.success) continue;
+    lines.push(csvRow([
+      data.timestamp,
+      artistName,
+      data.followers || 0,
+      data.following || 0
+    ]));
+  }
+
+  if (lines.length > 0) {
+    fs.appendFileSync(FOLLOWERS_FILE, lines.join('\n') + '\n', 'utf-8');
+    console.log(`[csv] ${lines.length}件のフォロワーデータを保存 → ${FOLLOWERS_FILE}`);
+  }
+
+  return lines.length;
 }
 
 /**
@@ -229,4 +258,4 @@ function parseCSVLine(line) {
   return fields;
 }
 
-module.exports = { saveSongsData, saveTrendsData, getLastSongsData, saveArtistsList };
+module.exports = { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList };

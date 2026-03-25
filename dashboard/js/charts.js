@@ -1,10 +1,12 @@
 // === データ管理 ===
 let songsData = [];
 let trendsData = [];
-let artistsInfo = {}; // { name: { avatar: url } }
+let followersData = [];
+let artistsInfo = {}; // { name: { avatar: url, followers: n, following: n } }
 let overviewChart = null;
 let songPlaysChart = null;
 let songLikesChart = null;
+let followersChart = null;
 let tableSortKey = 'plays';
 let tableSortAsc = false;
 
@@ -87,7 +89,11 @@ async function loadFromCSV() {
 
     // アーティスト情報を保持
     for (const a of artists) {
-      artistsInfo[a.name] = { avatar: a.avatar || '' };
+      artistsInfo[a.name] = {
+        avatar: a.avatar || '',
+        followers: a.followers || 0,
+        following: a.following || 0
+      };
     }
 
     const allSongs = [];
@@ -113,6 +119,16 @@ async function loadFromCSV() {
       }
     } catch (e) {
       console.warn('trends.csv 読み込み失敗:', e.message);
+    }
+
+    try {
+      const followersRes = await fetch('../data/followers.csv');
+      if (followersRes.ok) {
+        const text = await followersRes.text();
+        followersData = parseCSV(text);
+      }
+    } catch (e) {
+      console.warn('followers.csv 読み込み失敗:', e.message);
     }
 
     if (songsData.length > 0) {
@@ -192,6 +208,7 @@ function updateDashboard() {
   updateSongOptions();
   updateStats();
   updateOverviewChart();
+  updateFollowersChart();
   updateSongDetail();
   updateSongsTable();
   updateTrendsTable();
@@ -270,6 +287,16 @@ function updateStats() {
   document.getElementById('stat-plays').textContent = totalPlays.toLocaleString();
   document.getElementById('stat-likes').textContent = totalLikes.toLocaleString();
   document.getElementById('stat-songs').textContent = songCount;
+
+  // フォロワー数（artists.jsonの最新値 or followers.csvの最新値）
+  const selectedArtist = artistSelect.value;
+  let totalFollowers = 0;
+  if (selectedArtist !== 'all') {
+    totalFollowers = artistsInfo[selectedArtist]?.followers || 0;
+  } else {
+    totalFollowers = Object.values(artistsInfo).reduce((s, a) => s + (a.followers || 0), 0);
+  }
+  document.getElementById('stat-followers').textContent = totalFollowers.toLocaleString();
 
   const trendMatches = trendsData.filter(d => d.artist !== '-').length;
   document.getElementById('stat-trending').textContent = trendMatches;
@@ -366,6 +393,79 @@ function updateOverviewChart() {
           songSelect.value = song.songId;
           updateSongDetail();
           document.getElementById('song-info-row').scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  });
+}
+
+// === フォロワー推移チャート ===
+function updateFollowersChart() {
+  const chartArea = document.getElementById('followers-chart-area');
+  if (followersData.length === 0) {
+    chartArea.style.display = 'none';
+    return;
+  }
+
+  chartArea.style.display = 'block';
+  const selectedArtist = artistSelect.value;
+
+  // フィルター
+  let filtered = followersData;
+  if (selectedArtist !== 'all') {
+    filtered = filtered.filter(d => d.artist === selectedArtist);
+  }
+
+  if (filtered.length === 0) {
+    chartArea.style.display = 'none';
+    return;
+  }
+
+  // アーティストごとにデータセットを作成
+  const artists = [...new Set(filtered.map(d => d.artist))];
+  const datasets = artists.map((artist, i) => {
+    const artistRows = filtered.filter(d => d.artist === artist)
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return {
+      label: artist,
+      data: artistRows.map(d => ({
+        x: new Date(d.timestamp),
+        y: parseInt(d.followers) || 0
+      })),
+      borderColor: COLORS[i % COLORS.length],
+      backgroundColor: COLORS[i % COLORS.length] + '20',
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0.3,
+      fill: false
+    };
+  });
+
+  if (followersChart) followersChart.destroy();
+  followersChart = new Chart(document.getElementById('followers-chart'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          type: 'time',
+          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
+          grid: { color: '#f0f2f5' },
+          ticks: { color: '#8395a7' }
+        },
+        y: {
+          title: { display: true, text: 'フォロワー数', color: '#8395a7' },
+          grid: { color: '#f0f2f5' },
+          ticks: { color: '#8395a7' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#2d3436', boxWidth: 12, font: { size: 11 } },
+          position: 'bottom'
         }
       }
     }
