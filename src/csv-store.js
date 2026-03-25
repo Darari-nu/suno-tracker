@@ -6,7 +6,7 @@ const BASE_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(BASE_DIR, 'data');
 const TRENDS_FILE = path.join(DATA_DIR, config.data.trendsFile || 'trends.csv');
 
-const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments,imageUrl';
+const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments,imageUrl,createdAt';
 const TRENDS_HEADER = 'timestamp,region,period,artist,songId,title,rank,plays,likes';
 
 /**
@@ -71,7 +71,8 @@ function saveSongsData(artistData) {
         song.plays,
         song.likes,
         song.comments,
-        song.imageUrl || ''
+        song.imageUrl || '',
+        song.createdAt || ''
       ]));
     }
 
@@ -89,7 +90,10 @@ function saveSongsData(artistData) {
  * artists.json を生成する（ダッシュボード用）
  */
 function saveArtistsList(artistData) {
-  const artists = Object.keys(artistData);
+  const artists = Object.entries(artistData).map(([name, data]) => ({
+    name,
+    avatar: data.avatarUrl || ''
+  }));
   const filePath = path.join(DATA_DIR, 'artists.json');
 
   if (!fs.existsSync(DATA_DIR)) {
@@ -97,7 +101,7 @@ function saveArtistsList(artistData) {
   }
 
   fs.writeFileSync(filePath, JSON.stringify(artists, null, 2), 'utf-8');
-  console.log(`[csv] artists.json 更新: ${artists.join(', ')}`);
+  console.log(`[csv] artists.json 更新: ${artists.map(a => a.name).join(', ')}`);
 }
 
 /**

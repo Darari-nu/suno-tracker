@@ -1,6 +1,7 @@
 // === データ管理 ===
 let songsData = [];
 let trendsData = [];
+let artistsInfo = {}; // { name: { avatar: url } }
 let overviewChart = null;
 let songPlaysChart = null;
 let songLikesChart = null;
@@ -77,19 +78,29 @@ async function loadFromCSV() {
   try {
     const artistsRes = await fetch('../data/artists.json');
     if (!artistsRes.ok) throw new Error('artists.json not found');
-    const artists = await artistsRes.json();
+    const artistsRaw = await artistsRes.json();
+
+    // artists.json の形式を自動判定（文字列配列 or オブジェクト配列）
+    const artists = Array.isArray(artistsRaw) && typeof artistsRaw[0] === 'string'
+      ? artistsRaw.map(name => ({ name, avatar: '' }))
+      : artistsRaw;
+
+    // アーティスト情報を保持
+    for (const a of artists) {
+      artistsInfo[a.name] = { avatar: a.avatar || '' };
+    }
 
     const allSongs = [];
     for (const artist of artists) {
       try {
-        const res = await fetch(`../data/${artist}.csv`);
+        const res = await fetch(`../data/${artist.name}.csv`);
         if (res.ok) {
           const text = await res.text();
           const parsed = parseCSV(text);
           allSongs.push(...parsed);
         }
       } catch (e) {
-        console.warn(`${artist}.csv 読み込み失敗:`, e.message);
+        console.warn(`${artist.name}.csv 読み込み失敗:`, e.message);
       }
     }
     songsData = allSongs;
@@ -177,6 +188,7 @@ function getFilteredData() {
 // === ダッシュボード更新 ===
 function updateDashboard() {
   updateArtistOptions();
+  updateArtistAvatar();
   updateSongOptions();
   updateStats();
   updateOverviewChart();
@@ -184,6 +196,27 @@ function updateDashboard() {
   updateSongsTable();
   updateTrendsTable();
   document.getElementById('stats-row').style.display = 'flex';
+}
+
+function updateArtistAvatar() {
+  const selected = artistSelect.value;
+  const avatarArea = document.getElementById('artist-avatar-area');
+  const avatarImg = document.getElementById('artist-avatar');
+  if (selected !== 'all' && artistsInfo[selected]?.avatar) {
+    avatarImg.src = artistsInfo[selected].avatar;
+    avatarImg.alt = selected;
+    avatarArea.style.display = 'block';
+  } else {
+    avatarArea.style.display = 'none';
+  }
+}
+
+function isNewSong(createdAt) {
+  if (!createdAt) return false;
+  const created = new Date(createdAt);
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  return created >= oneMonthAgo;
 }
 
 function updateArtistOptions() {
@@ -214,7 +247,8 @@ function updateSongOptions() {
   for (const song of latest) {
     const opt = document.createElement('option');
     opt.value = song.songId;
-    opt.textContent = `${song.title} (${song.artist}) - ${parseInt(song.plays || 0).toLocaleString()}再生`;
+    const newTag = isNewSong(song.createdAt) ? '🆕 ' : '';
+    opt.textContent = `${newTag}${song.title} (${song.artist}) - ${parseInt(song.plays || 0).toLocaleString()}再生`;
     songSelect.appendChild(opt);
     if (song.songId === current) currentExists = true;
   }
@@ -267,10 +301,20 @@ function updateOverviewChart() {
   // 上位20曲を表示（多すぎると見にくい）
   const display = latest.slice(0, 20);
 
-  const labels = display.map(d => d.title);
+  const labels = display.map(d => {
+    const isNew = isNewSong(d.createdAt);
+    return isNew ? `🆕 ${d.title}` : d.title;
+  });
   const values = display.map(d => parseInt(d[metric]) || 0);
-  const bgColors = display.map((_, i) => i < 10 ? COLORS[i] + 'cc' : GRAY + '80');
-  const borderColors = display.map((_, i) => i < 10 ? COLORS[i] : GRAY);
+  const NEW_COLOR = '#ef4444';
+  const bgColors = display.map((d, i) => {
+    if (isNewSong(d.createdAt)) return NEW_COLOR + 'cc';
+    return i < 10 ? COLORS[i] + 'cc' : GRAY + '80';
+  });
+  const borderColors = display.map((d, i) => {
+    if (isNewSong(d.createdAt)) return NEW_COLOR;
+    return i < 10 ? COLORS[i] : GRAY;
+  });
 
   if (overviewChart) overviewChart.destroy();
   overviewChart = new Chart(document.getElementById('overview-chart'), {
@@ -584,8 +628,11 @@ function updateSongsTable() {
       updateSongDetail();
       document.getElementById('song-info-row').scrollIntoView({ behavior: 'smooth' });
     });
+    const isNew = isNewSong(song.createdAt);
+    const titleStyle = isNew ? ' style="color:#ef4444;font-weight:600;"' : '';
+    const newBadge = isNew ? '<span style="color:#ef4444;font-size:10px;margin-left:4px;">NEW</span>' : '';
     tr.innerHTML = `
-      <td>${escapeHtml(song.title)}</td>
+      <td${titleStyle}>${escapeHtml(song.title)}${newBadge}</td>
       <td>${escapeHtml(song.artist)}</td>
       <td class="num">${song.playsNum.toLocaleString()}</td>
       <td class="num">${song.likesNum.toLocaleString()}</td>
