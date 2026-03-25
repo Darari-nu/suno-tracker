@@ -97,14 +97,24 @@ async function selectFilter(page, dropdownIndex, targetLabel) {
  * 現在表示中のトレンドから全曲を取得する
  */
 async function getCurrentTrendSongs(page) {
-  // スクロールして全曲読み込み
-  let prevHeight = 0;
-  for (let i = 0; i < 10; i++) {
-    const currentHeight = await page.evaluate(() => document.body.scrollHeight);
-    if (currentHeight === prevHeight) break;
-    prevHeight = currentHeight;
+  // コンテンツ読み込み待ち
+  await page.waitForTimeout(2000);
+
+  // スクロールして全曲読み込み（CI環境ではより多くのスクロールが必要）
+  let prevCount = 0;
+  let stableCount = 0;
+  for (let i = 0; i < 20; i++) {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
+
+    const currentCount = await page.locator('a[href*="/song/"]').count();
+    if (currentCount === prevCount) {
+      stableCount++;
+      if (stableCount >= 3) break; // 3回連続で変化なし→全曲読み込み完了
+    } else {
+      stableCount = 0;
+    }
+    prevCount = currentCount;
   }
   // ページトップに戻る
   await page.evaluate(() => window.scrollTo(0, 0));
