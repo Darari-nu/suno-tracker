@@ -46,11 +46,11 @@ const fileInputArea = document.getElementById('file-input-area');
 const fileInput = document.getElementById('file-input');
 
 fileInputArea.addEventListener('click', () => fileInput.click());
-fileInputArea.addEventListener('dragover', e => { e.preventDefault(); fileInputArea.style.borderColor = '#2563eb'; });
-fileInputArea.addEventListener('dragleave', () => { fileInputArea.style.borderColor = '#333'; });
+fileInputArea.addEventListener('dragover', e => { e.preventDefault(); fileInputArea.style.borderColor = '#6c5ce7'; });
+fileInputArea.addEventListener('dragleave', () => { fileInputArea.style.borderColor = '#dfe6e9'; });
 fileInputArea.addEventListener('drop', e => {
   e.preventDefault();
-  fileInputArea.style.borderColor = '#333';
+  fileInputArea.style.borderColor = '#dfe6e9';
   handleFiles(e.dataTransfer.files);
 });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
@@ -277,10 +277,10 @@ function updateStats() {
 
 // === 総合チャート ===
 const COLORS = [
-  '#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
+  '#6c5ce7', '#fdcb6e', '#00b894', '#e17055', '#0984e3',
+  '#fd79a8', '#00cec9', '#f39c12', '#a29bfe', '#55efc4'
 ];
-const GRAY = '#444';
+const GRAY = '#dfe6e9';
 
 function updateOverviewChart() {
   const data = getFilteredData();
@@ -325,8 +325,8 @@ function updateOverviewChart() {
         data: values,
         backgroundColor: bgColors,
         borderColor: borderColors,
-        borderWidth: 1,
-        borderRadius: 4
+        borderWidth: 0,
+        borderRadius: 6
       }]
     },
     options: {
@@ -335,17 +335,17 @@ function updateOverviewChart() {
       maintainAspectRatio: false,
       scales: {
         x: {
-          title: { display: true, text: metricLabel, color: '#666' },
-          grid: { color: '#222' },
+          title: { display: true, text: metricLabel, color: '#8395a7' },
+          grid: { color: '#f0f2f5' },
           ticks: {
-            color: '#666',
+            color: '#8395a7',
             callback: (v) => v.toLocaleString()
           }
         },
         y: {
           grid: { display: false },
           ticks: {
-            color: '#ccc',
+            color: '#2d3436',
             font: { size: 12 },
             autoSkip: false
           }
@@ -467,7 +467,7 @@ function updateSongDetail() {
   });
 
   const songTitle = latest.title;
-  const color = '#3b82f6';
+  const color = '#6c5ce7';
 
   // 再生数チャート
   const playsDataset = {
@@ -498,8 +498,8 @@ function updateSongDetail() {
       const entry = songData.find(d => d.timestamp === ts);
       return entry ? { x: new Date(ts), y: parseInt(entry.likes) || 0 } : null;
     }).filter(d => d),
-    borderColor: '#ec4899',
-    backgroundColor: '#ec489920',
+    borderColor: '#fd79a8',
+    backgroundColor: '#fd79a820',
     borderWidth: 2,
     pointRadius: 2,
     tension: 0.3,
@@ -523,18 +523,18 @@ function songChartOptions(yLabel, annotations) {
       x: {
         type: 'time',
         time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
-        grid: { color: '#222' },
-        ticks: { color: '#666' }
+        grid: { color: '#f0f2f5' },
+        ticks: { color: '#8395a7' }
       },
       y: {
-        title: { display: true, text: yLabel, color: '#666' },
-        grid: { color: '#222' },
-        ticks: { color: '#666' }
+        title: { display: true, text: yLabel, color: '#8395a7' },
+        grid: { color: '#f0f2f5' },
+        ticks: { color: '#8395a7' }
       }
     },
     plugins: {
       legend: {
-        labels: { color: '#ccc', boxWidth: 12, font: { size: 11 } },
+        labels: { color: '#2d3436', boxWidth: 12, font: { size: 11 } },
         position: 'bottom'
       },
       annotation: { annotations }
@@ -654,7 +654,7 @@ function updateTrendsTable() {
     .slice(0, 50);
 
   if (trendMatches.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;">ランクインデータなし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8395a7;">ランクインデータなし</td></tr>';
     return;
   }
 
