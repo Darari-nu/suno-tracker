@@ -48,11 +48,11 @@ const fileInputArea = document.getElementById('file-input-area');
 const fileInput = document.getElementById('file-input');
 
 fileInputArea.addEventListener('click', () => fileInput.click());
-fileInputArea.addEventListener('dragover', e => { e.preventDefault(); fileInputArea.style.borderColor = '#6c5ce7'; });
-fileInputArea.addEventListener('dragleave', () => { fileInputArea.style.borderColor = '#dfe6e9'; });
+fileInputArea.addEventListener('dragover', e => { e.preventDefault(); fileInputArea.style.borderColor = '#c23a22'; });
+fileInputArea.addEventListener('dragleave', () => { fileInputArea.style.borderColor = '#d4cdc2'; });
 fileInputArea.addEventListener('drop', e => {
   e.preventDefault();
-  fileInputArea.style.borderColor = '#dfe6e9';
+  fileInputArea.style.borderColor = '#d4cdc2';
   handleFiles(e.dataTransfer.files);
 });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
@@ -304,10 +304,10 @@ function updateStats() {
 
 // === 総合チャート ===
 const COLORS = [
-  '#6c5ce7', '#fdcb6e', '#00b894', '#e17055', '#0984e3',
-  '#fd79a8', '#00cec9', '#f39c12', '#a29bfe', '#55efc4'
+  '#c23a22', '#1a1a1a', '#6b6560', '#a39e96', '#3d3833',
+  '#8b4533', '#2a2520', '#7a7168', '#c4bbb0', '#5a524a'
 ];
-const GRAY = '#dfe6e9';
+const GRAY = '#d4cdc2';
 
 function updateOverviewChart() {
   const data = getFilteredData();
@@ -333,7 +333,7 @@ function updateOverviewChart() {
     return isNew ? `🆕 ${d.title}` : d.title;
   });
   const values = display.map(d => parseInt(d[metric]) || 0);
-  const NEW_COLOR = '#ef4444';
+  const NEW_COLOR = '#c23a22';
   const bgColors = display.map((d, i) => {
     if (isNewSong(d.createdAt)) return NEW_COLOR + 'cc';
     return i < 10 ? COLORS[i] + 'cc' : GRAY + '80';
@@ -353,7 +353,7 @@ function updateOverviewChart() {
         backgroundColor: bgColors,
         borderColor: borderColors,
         borderWidth: 0,
-        borderRadius: 6
+        borderRadius: 0
       }]
     },
     options: {
@@ -362,17 +362,17 @@ function updateOverviewChart() {
       maintainAspectRatio: false,
       scales: {
         x: {
-          title: { display: true, text: metricLabel, color: '#8395a7' },
-          grid: { color: '#f0f2f5' },
+          title: { display: true, text: metricLabel, color: '#6b6560' },
+          grid: { color: '#d4cdc2' },
           ticks: {
-            color: '#8395a7',
+            color: '#6b6560',
             callback: (v) => v.toLocaleString()
           }
         },
         y: {
           grid: { display: false },
           ticks: {
-            color: '#2d3436',
+            color: '#1a1a1a',
             font: { size: 12 },
             autoSkip: false
           }
@@ -453,18 +453,18 @@ function updateFollowersChart() {
         x: {
           type: 'time',
           time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
-          grid: { color: '#f0f2f5' },
-          ticks: { color: '#8395a7' }
+          grid: { color: '#d4cdc2' },
+          ticks: { color: '#6b6560' }
         },
         y: {
-          title: { display: true, text: 'フォロワー数', color: '#8395a7' },
-          grid: { color: '#f0f2f5' },
-          ticks: { color: '#8395a7' }
+          title: { display: true, text: 'フォロワー数', color: '#6b6560' },
+          grid: { color: '#d4cdc2' },
+          ticks: { color: '#6b6560' }
         }
       },
       plugins: {
         legend: {
-          labels: { color: '#2d3436', boxWidth: 12, font: { size: 11 } },
+          labels: { color: '#1a1a1a', boxWidth: 12, font: { size: 11 } },
           position: 'bottom'
         }
       }
@@ -538,7 +538,7 @@ function updateSongDetail() {
   if (songTrends.length > 0) {
     const latestTrend = songTrends.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
     document.getElementById('song-trend-status').innerHTML =
-      `<span style="color:#f59e0b;">${latestTrend.region}/${latestTrend.period} ${latestTrend.rank}位</span>`;
+      `<span style="color:#c23a22;">${latestTrend.region}/${latestTrend.period} ${latestTrend.rank}位</span>`;
   } else {
     document.getElementById('song-trend-status').textContent = 'なし';
   }
@@ -551,15 +551,15 @@ function updateSongDetail() {
       type: 'line',
       xMin: ts,
       xMax: ts,
-      borderColor: '#f59e0b88',
+      borderColor: '#c23a2288',
       borderWidth: 2,
       borderDash: [4, 4],
       label: {
         display: true,
         content: `${match.region}/${match.period} ${match.rank}位`,
         position: 'start',
-        backgroundColor: '#f59e0b33',
-        color: '#f59e0b',
+        backgroundColor: '#c23a2233',
+        color: '#c23a22',
         font: { size: 10 },
         padding: 3
       }
@@ -567,7 +567,7 @@ function updateSongDetail() {
   });
 
   const songTitle = latest.title;
-  const color = '#6c5ce7';
+  const color = '#c23a22';
 
   // 再生数チャート
   const playsDataset = {
@@ -598,8 +598,8 @@ function updateSongDetail() {
       const entry = songData.find(d => d.timestamp === ts);
       return entry ? { x: new Date(ts), y: parseInt(entry.likes) || 0 } : null;
     }).filter(d => d),
-    borderColor: '#fd79a8',
-    backgroundColor: '#fd79a820',
+    borderColor: '#1a1a1a',
+    backgroundColor: '#1a1a1a20',
     borderWidth: 2,
     pointRadius: 2,
     tension: 0.3,
@@ -623,18 +623,18 @@ function songChartOptions(yLabel, annotations) {
       x: {
         type: 'time',
         time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
-        grid: { color: '#f0f2f5' },
-        ticks: { color: '#8395a7' }
+        grid: { color: '#d4cdc2' },
+        ticks: { color: '#6b6560' }
       },
       y: {
-        title: { display: true, text: yLabel, color: '#8395a7' },
-        grid: { color: '#f0f2f5' },
-        ticks: { color: '#8395a7' }
+        title: { display: true, text: yLabel, color: '#6b6560' },
+        grid: { color: '#d4cdc2' },
+        ticks: { color: '#6b6560' }
       }
     },
     plugins: {
       legend: {
-        labels: { color: '#2d3436', boxWidth: 12, font: { size: 11 } },
+        labels: { color: '#1a1a1a', boxWidth: 12, font: { size: 11 } },
         position: 'bottom'
       },
       annotation: { annotations }
@@ -729,8 +729,8 @@ function updateSongsTable() {
       document.getElementById('song-info-row').scrollIntoView({ behavior: 'smooth' });
     });
     const isNew = isNewSong(song.createdAt);
-    const titleStyle = isNew ? ' style="color:#ef4444;font-weight:600;"' : '';
-    const newBadge = isNew ? '<span style="color:#ef4444;font-size:10px;margin-left:4px;">NEW</span>' : '';
+    const titleStyle = isNew ? ' style="color:#c23a22;font-weight:600;"' : '';
+    const newBadge = isNew ? '<span style="color:#c23a22;font-size:10px;margin-left:4px;">NEW</span>' : '';
     tr.innerHTML = `
       <td${titleStyle}>${escapeHtml(song.title)}${newBadge}</td>
       <td>${escapeHtml(song.artist)}</td>
@@ -754,7 +754,7 @@ function updateTrendsTable() {
     .slice(0, 50);
 
   if (trendMatches.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#8395a7;">ランクインデータなし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#a39e96;">ランクインデータなし</td></tr>';
     return;
   }
 
@@ -779,8 +779,8 @@ function formatDiff(diff) {
 }
 
 function formatDiffSmall(diff) {
-  if (diff > 0) return `<span style="color:#34d399;">+${diff.toLocaleString()}</span>`;
-  if (diff < 0) return `<span style="color:#fca5a5;">${diff.toLocaleString()}</span>`;
+  if (diff > 0) return `<span style="color:#c23a22;">+${diff.toLocaleString()}</span>`;
+  if (diff < 0) return `<span style="color:#6b6560;">${diff.toLocaleString()}</span>`;
   return '';
 }
 
