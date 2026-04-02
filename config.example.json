@@ -16,13 +16,15 @@
   },
   "schedule": {
     "intervalHours": 3,
-    "dailyReportHour": 9
+    "dailyReportHour": 9,
+    "newSongBoostDays": 10,
+    "boostIntervalHours": 1
   },
   "data": {
     "trendsFile": "trends.csv"
   },
   "notification": {
-    "discordWebhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN",
+    "discordWebhookUrl": "",
     "enabled": false
   },
   "anomaly": {

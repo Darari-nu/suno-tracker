@@ -3,6 +3,7 @@ const { checkAllTrends } = require('./trend-checker');
 const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList } = require('./csv-store');
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
+const { hasRecentNewSong } = require('./frequency-checker');
 const config = require('../config.json');
 
 async function main() {
@@ -10,6 +11,23 @@ async function main() {
   console.log(`\n========================================`);
   console.log(`SUNO Tracker 実行開始: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}`);
   console.log(`========================================\n`);
+
+  // Step 0: 実行頻度チェック（新曲がなければ3時間おきのみ実行）
+  const boostDays = config.schedule.newSongBoostDays || 10;
+  const normalInterval = config.schedule.intervalHours || 3;
+  const hasNewSong = hasRecentNewSong(boostDays);
+  const currentHourUTC = new Date().getUTCHours();
+  const isNormalSlot = currentHourUTC % normalInterval === 0;
+
+  if (hasNewSong) {
+    console.log(`[頻度] 🆕 新曲検知（${boostDays}日以内）→ 高頻度モード（毎時実行）`);
+  } else if (isNormalSlot) {
+    console.log(`[頻度] 通常モード（${normalInterval}時間おき）→ 実行`);
+  } else {
+    console.log(`[頻度] 通常モード → スキップ（次回は${normalInterval - (currentHourUTC % normalInterval)}時間後）`);
+    console.log(`========================================\n`);
+    return;
+  }
 
   // Step 1: 前回データを取得（異常検知用）
   console.log('[1/6] 前回データを読み込み中...');

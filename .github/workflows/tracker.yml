@@ -2,7 +2,7 @@ name: SUNO Tracker
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # 3時間ごと（UTC）
+    - cron: '0 * * * *'  # 毎時（新曲なければ3時間おきにスキップ）
   workflow_dispatch:  # 手動実行
 
 permissions:
