@@ -105,4 +105,43 @@ function parseCSVLine(line) {
   return fields;
 }
 
-module.exports = { hasRecentNewSong };
+/**
+ * 最後のデータ取得から指定時間（時間単位）以上経過しているか判定
+ * GitHub Actions のcron遅延に対応するため、時刻モジュロではなく経過時間で判定
+ */
+function shouldRunNow(intervalHours) {
+  const toleranceMs = 30 * 60 * 1000; // 30分の余裕（cron遅延対策）
+  const intervalMs = intervalHours * 60 * 60 * 1000;
+
+  for (const artist of config.artists) {
+    const lastTs = getLastTimestamp(artist.name);
+    if (!lastTs) return true; // データなし→実行
+
+    const elapsed = Date.now() - lastTs.getTime();
+    if (elapsed >= intervalMs - toleranceMs) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * アーティストのCSVから最新のtimestamp（取得時刻）を取得
+ */
+function getLastTimestamp(artistName) {
+  // アーティスト別CSV
+  const artistCsv = path.join(DATA_DIR, `${artistName}.csv`);
+  if (fs.existsSync(artistCsv)) {
+    const content = fs.readFileSync(artistCsv, 'utf-8');
+    const lines = content.trim().split('\n');
+    if (lines.length > 1) {
+      const lastLine = lines[lines.length - 1];
+      const fields = parseCSVLine(lastLine);
+      const ts = new Date(fields[0]);
+      if (!isNaN(ts.getTime())) return ts;
+    }
+  }
+  return null;
+}
+
+module.exports = { hasRecentNewSong, shouldRunNow };

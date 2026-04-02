@@ -3,7 +3,7 @@ const { checkAllTrends } = require('./trend-checker');
 const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList } = require('./csv-store');
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
-const { hasRecentNewSong } = require('./frequency-checker');
+const { hasRecentNewSong, shouldRunNow } = require('./frequency-checker');
 const config = require('../config.json');
 
 async function main() {
@@ -15,16 +15,15 @@ async function main() {
   // Step 0: 実行頻度チェック（新曲がなければ3時間おきのみ実行）
   const boostDays = config.schedule.newSongBoostDays || 10;
   const normalInterval = config.schedule.intervalHours || 3;
+  const boostInterval = config.schedule.boostIntervalHours || 1;
   const hasNewSong = hasRecentNewSong(boostDays);
-  const currentHourUTC = new Date().getUTCHours();
-  const isNormalSlot = currentHourUTC % normalInterval === 0;
 
   if (hasNewSong) {
-    console.log(`[頻度] 🆕 新曲検知（${boostDays}日以内）→ 高頻度モード（毎時実行）`);
-  } else if (isNormalSlot) {
+    console.log(`[頻度] 🆕 新曲検知（${boostDays}日以内）→ 高頻度モード（${boostInterval}時間おき）`);
+  } else if (shouldRunNow(normalInterval)) {
     console.log(`[頻度] 通常モード（${normalInterval}時間おき）→ 実行`);
   } else {
-    console.log(`[頻度] 通常モード → スキップ（次回は${normalInterval - (currentHourUTC % normalInterval)}時間後）`);
+    console.log(`[頻度] 通常モード → スキップ（前回取得から${normalInterval}時間未経過）`);
     console.log(`========================================\n`);
     return;
   }
