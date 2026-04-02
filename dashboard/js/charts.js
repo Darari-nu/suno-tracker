@@ -231,9 +231,9 @@ function updateArtistAvatar() {
 function isNewSong(createdAt) {
   if (!createdAt) return false;
   const created = new Date(createdAt);
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  return created >= oneMonthAgo;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 10);
+  return created >= cutoff;
 }
 
 function updateArtistOptions() {
