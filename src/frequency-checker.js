@@ -35,7 +35,19 @@ function findNewestCreatedAt(csvPath, filterArtist) {
 
   // ヘッダーから createdAt カラムのインデックスを探す
   const header = parseCSVLine(lines[0]);
-  const createdAtIdx = header.findIndex(h => h.toLowerCase() === 'createdat');
+  let createdAtIdx = header.findIndex(h => h.toLowerCase() === 'createdat');
+
+  // ヘッダーにcreatedAtがなくてもデータ行に10列ある場合、index 9がcreatedAt
+  // （旧ヘッダー8列 + imageUrl,createdAt が後から追加されたケース）
+  if (createdAtIdx === -1) {
+    const sampleFields = parseCSVLine(lines[1]);
+    if (sampleFields.length >= 10) {
+      const candidate = new Date(sampleFields[9]);
+      if (!isNaN(candidate.getTime())) {
+        createdAtIdx = 9;
+      }
+    }
+  }
   if (createdAtIdx === -1) return null;
 
   const artistIdx = header.findIndex(h => h.toLowerCase() === 'artist');

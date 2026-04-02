@@ -38,6 +38,20 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
+      - name: Fix CSV headers if needed
+        run: |
+          CORRECT_HEADER="timestamp,artist,songId,title,url,plays,likes,comments,imageUrl,createdAt"
+          for f in data/*.csv; do
+            [ ! -f "$f" ] && continue
+            # followers.csv と trends.csv はスキップ
+            case "$f" in *followers.csv|*trends.csv) continue;; esac
+            CURRENT=$(head -1 "$f")
+            if [ "$CURRENT" != "$CORRECT_HEADER" ]; then
+              echo "Fixing header: $f"
+              sed -i "1s/.*/$CORRECT_HEADER/" "$f"
+            fi
+          done
+
       - name: Run tracker
         run: node src/index.js
 
