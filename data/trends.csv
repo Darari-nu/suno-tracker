@@ -889,3 +889,14 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-04-03T20:28:00.920Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,17,809,233
 2026-04-03T20:28:00.920Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5570,709
 2026-04-03T20:28:00.920Z,Japanese,All Time,-,-,-,0,0,0
+2026-04-03T21:26:17.268Z,Global,Now,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,2,1221,308
+2026-04-03T21:26:17.268Z,Global,Now,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,11,832,233
+2026-04-03T21:26:17.268Z,Global,Weekly,-,-,-,0,0,0
+2026-04-03T21:26:17.268Z,Global,Monthly,-,-,-,0,0,0
+2026-04-03T21:26:17.268Z,Global,All Time,-,-,-,0,0,0
+2026-04-03T21:26:17.268Z,Japanese,Now,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,1,1221,308
+2026-04-03T21:26:17.268Z,Japanese,Now,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,2,832,233
+2026-04-03T21:26:17.268Z,Japanese,Weekly,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,3,1221,308
+2026-04-03T21:26:17.268Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,17,832,233
+2026-04-03T21:26:17.268Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5570,709
+2026-04-03T21:26:17.268Z,Japanese,All Time,-,-,-,0,0,0
