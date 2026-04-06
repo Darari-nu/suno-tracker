@@ -462,7 +462,11 @@ function updateFollowersChart() {
       scales: {
         x: {
           type: 'time',
-          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' },
+          time: {
+            unit: 'day',
+            displayFormats: { day: 'M/d' },
+            tooltipFormat: 'yyyy/MM/dd HH:mm'
+          },
           grid: { color: '#d4cdc2' },
           ticks: { color: '#6b6560' }
         },
