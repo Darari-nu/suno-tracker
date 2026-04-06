@@ -9,6 +9,16 @@ let songLikesChart = null;
 let followersChart = null;
 let tableSortKey = 'plays';
 let tableSortAsc = false;
+let yAxisFromZero = false;
+
+function toggleYAxis() {
+  yAxisFromZero = !yAxisFromZero;
+  const btn = document.getElementById('yaxis-toggle');
+  btn.textContent = yAxisFromZero ? 'Y軸: 0から' : 'Y軸: オート';
+  btn.style.borderColor = yAxisFromZero ? 'var(--accent)' : 'var(--border)';
+  btn.style.color = yAxisFromZero ? 'var(--accent)' : 'var(--ink-light)';
+  updateSongDetail();
+}
 
 // === CSV パーサー ===
 function parseCSV(text) {
@@ -543,28 +553,8 @@ function updateSongDetail() {
     document.getElementById('song-trend-status').textContent = 'なし';
   }
 
-  // トレンドのアノテーション
-  const annotations = {};
-  songTrends.forEach((match, idx) => {
-    const ts = new Date(match.timestamp);
-    annotations[`trend_${idx}`] = {
-      type: 'line',
-      xMin: ts,
-      xMax: ts,
-      borderColor: '#c23a2288',
-      borderWidth: 2,
-      borderDash: [4, 4],
-      label: {
-        display: true,
-        content: `${match.region}/${match.period} ${match.rank}位`,
-        position: 'start',
-        backgroundColor: '#c23a2233',
-        color: '#c23a22',
-        font: { size: 10 },
-        padding: 3
-      }
-    };
-  });
+  // トレンドのアノテーション（帯エリア表示）
+  const annotations = buildTrendAnnotations(songTrends);
 
   const songTitle = latest.title;
   const color = '#c23a22';
@@ -614,6 +604,70 @@ function updateSongDetail() {
   });
 }
 
+// トレンド連続期間を検出してbox annotationを生成
+function buildTrendAnnotations(songTrends) {
+  if (songTrends.length === 0) return {};
+
+  const sorted = [...songTrends].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const GAP_MS = 6 * 60 * 60 * 1000; // 6時間以内を同一期間とみなす
+  const MIN_WIDTH_MS = 2 * 60 * 60 * 1000; // 最小帯幅2時間
+
+  const COLORS = {
+    daily:   { bg: 'rgba(80, 140, 220, 0.10)', border: 'rgba(80, 140, 220, 0.50)' },
+    weekly:  { bg: 'rgba(60, 170, 100, 0.10)', border: 'rgba(60, 170, 100, 0.50)' },
+    default: { bg: 'rgba(194, 58, 34, 0.08)',  border: 'rgba(194, 58, 34, 0.40)' }
+  };
+
+  // 連続グループ化
+  const groups = [];
+  let current = null;
+  for (const entry of sorted) {
+    const ts = new Date(entry.timestamp);
+    const key = `${entry.region}/${entry.period}`;
+    const rank = parseInt(entry.rank) || 0;
+    if (!current || current.key !== key || ts - current.endTs > GAP_MS) {
+      current = { key, region: entry.region, period: entry.period,
+                  startTs: ts, endTs: ts, minRank: rank, maxRank: rank };
+      groups.push(current);
+    } else {
+      current.endTs = ts;
+      current.minRank = Math.min(current.minRank, rank);
+      current.maxRank = Math.max(current.maxRank, rank);
+    }
+  }
+
+  const annotations = {};
+  groups.forEach((g, idx) => {
+    const colorKey = g.period === 'daily' ? 'daily' : g.period === 'weekly' ? 'weekly' : 'default';
+    const c = COLORS[colorKey];
+    const xMax = new Date(Math.max(g.endTs.getTime() + MIN_WIDTH_MS, g.startTs.getTime() + MIN_WIDTH_MS));
+    const rankText = g.minRank === g.maxRank ? `${g.minRank}位` : `${g.minRank}〜${g.maxRank}位`;
+    const durationH = Math.round((g.endTs - g.startTs) / (1000 * 60 * 60));
+    const durationText = durationH >= 24 ? `${Math.round(durationH / 24)}日間` : durationH > 0 ? `${durationH}h` : '';
+    const label = durationText ? [`${g.region} ${g.period}`, `${rankText} (${durationText})`] : [`${g.region} ${g.period}`, rankText];
+
+    annotations[`trend_box_${idx}`] = {
+      type: 'box',
+      xMin: g.startTs,
+      xMax,
+      backgroundColor: c.bg,
+      borderColor: c.border,
+      borderWidth: 1,
+      label: {
+        display: true,
+        content: label,
+        position: { x: 'center', y: 'start' },
+        backgroundColor: 'rgba(255,255,255,0.88)',
+        color: '#1a1a1a',
+        font: { size: 9 },
+        padding: { top: 3, bottom: 3, left: 5, right: 5 }
+      }
+    };
+  });
+
+  return annotations;
+}
+
 function songChartOptions(yLabel, annotations) {
   return {
     responsive: true,
@@ -629,7 +683,8 @@ function songChartOptions(yLabel, annotations) {
       y: {
         title: { display: true, text: yLabel, color: '#6b6560' },
         grid: { color: '#d4cdc2' },
-        ticks: { color: '#6b6560' }
+        ticks: { color: '#6b6560' },
+        ...(yAxisFromZero ? { min: 0 } : {})
       }
     },
     plugins: {
