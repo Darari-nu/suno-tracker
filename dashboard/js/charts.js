@@ -618,21 +618,27 @@ function buildTrendAnnotations(songTrends) {
     default: { bg: 'rgba(194, 58, 34, 0.08)',  border: 'rgba(194, 58, 34, 0.40)' }
   };
 
-  // 連続グループ化
-  const groups = [];
-  let current = null;
+  // キーごとに独立してグループ化（interleave問題を回避）
+  const byKey = {};
   for (const entry of sorted) {
-    const ts = new Date(entry.timestamp);
     const key = `${entry.region}/${entry.period}`;
-    const rank = parseInt(entry.rank) || 0;
-    if (!current || current.key !== key || ts - current.endTs > GAP_MS) {
-      current = { key, region: entry.region, period: entry.period,
-                  startTs: ts, endTs: ts, minRank: rank, maxRank: rank };
-      groups.push(current);
-    } else {
-      current.endTs = ts;
-      current.minRank = Math.min(current.minRank, rank);
-      current.maxRank = Math.max(current.maxRank, rank);
+    if (!byKey[key]) byKey[key] = [];
+    byKey[key].push({ key, region: entry.region, period: entry.period,
+                      ts: new Date(entry.timestamp), rank: parseInt(entry.rank) || 0 });
+  }
+  const groups = [];
+  for (const entries of Object.values(byKey)) {
+    let current = null;
+    for (const e of entries) {
+      if (!current || e.ts - current.endTs > GAP_MS) {
+        current = { key: e.key, region: e.region, period: e.period,
+                    startTs: e.ts, endTs: e.ts, minRank: e.rank, maxRank: e.rank };
+        groups.push(current);
+      } else {
+        current.endTs = e.ts;
+        current.minRank = Math.min(current.minRank, e.rank);
+        current.maxRank = Math.max(current.maxRank, e.rank);
+      }
     }
   }
 
@@ -642,9 +648,7 @@ function buildTrendAnnotations(songTrends) {
     const c = COLORS[colorKey];
     const xMax = new Date(Math.max(g.endTs.getTime() + MIN_WIDTH_MS, g.startTs.getTime() + MIN_WIDTH_MS));
     const rankText = g.minRank === g.maxRank ? `${g.minRank}位` : `${g.minRank}〜${g.maxRank}位`;
-    const durationH = Math.round((g.endTs - g.startTs) / (1000 * 60 * 60));
-    const durationText = durationH >= 24 ? `${Math.round(durationH / 24)}日間` : durationH > 0 ? `${durationH}h` : '';
-    const label = durationText ? [`${g.region} ${g.period}`, `${rankText} (${durationText})`] : [`${g.region} ${g.period}`, rankText];
+    const label = `${g.region}/${g.period} ${rankText}`;
 
     annotations[`trend_box_${idx}`] = {
       type: 'box',
@@ -657,10 +661,11 @@ function buildTrendAnnotations(songTrends) {
         display: true,
         content: label,
         position: { x: 'center', y: 'start' },
-        backgroundColor: 'rgba(255,255,255,0.88)',
+        yAdjust: idx * 22, // 複数ラベルが重ならないようにずらす
+        backgroundColor: 'rgba(255,255,255,0.90)',
         color: '#1a1a1a',
         font: { size: 9 },
-        padding: { top: 3, bottom: 3, left: 5, right: 5 }
+        padding: { top: 2, bottom: 2, left: 4, right: 4 }
       }
     };
   });
