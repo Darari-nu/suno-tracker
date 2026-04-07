@@ -1455,3 +1455,12 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-04-07T01:45:50.261Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,4,1059,256
 2026-04-07T01:45:50.261Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5578,711
 2026-04-07T01:45:50.261Z,Japanese,All Time,-,-,-,0,0,0
+2026-04-07T04:28:20.805Z,Global,Now,-,-,-,0,0,0
+2026-04-07T04:28:20.805Z,Global,Weekly,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,15,1649,359
+2026-04-07T04:28:20.805Z,Global,Monthly,-,-,-,0,0,0
+2026-04-07T04:28:20.805Z,Global,All Time,-,-,-,0,0,0
+2026-04-07T04:28:20.805Z,Japanese,Now,-,-,-,0,0,0
+2026-04-07T04:28:20.805Z,Japanese,Weekly,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,1,1649,359
+2026-04-07T04:28:20.805Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,4,1059,256
+2026-04-07T04:28:20.805Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5578,711
+2026-04-07T04:28:20.805Z,Japanese,All Time,-,-,-,0,0,0
