@@ -1473,3 +1473,12 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-04-07T06:15:44.077Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,4,1070,256
 2026-04-07T06:15:44.077Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5578,711
 2026-04-07T06:15:44.077Z,Japanese,All Time,-,-,-,0,0,0
+2026-04-07T08:07:39.996Z,Global,Now,coban3137,fae74bfb-66b9-4f40-b613-2764eddb6661,Turtleneck,34,100,78
+2026-04-07T08:07:39.996Z,Global,Weekly,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,15,1649,361
+2026-04-07T08:07:39.996Z,Global,Monthly,-,-,-,0,0,0
+2026-04-07T08:07:39.996Z,Global,All Time,-,-,-,0,0,0
+2026-04-07T08:07:39.996Z,Japanese,Now,-,-,-,0,0,0
+2026-04-07T08:07:39.996Z,Japanese,Weekly,coban3137,413d7a37-0488-402b-9eff-e6129ed0b8f4,水脈,1,1649,361
+2026-04-07T08:07:39.996Z,Japanese,Weekly,darari_nu,54bef081-c311-4055-8f73-a19633b60a74,鬼灯,4,1070,256
+2026-04-07T08:07:39.996Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5578,711
+2026-04-07T08:07:39.996Z,Japanese,All Time,-,-,-,0,0,0
