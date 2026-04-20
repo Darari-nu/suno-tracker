@@ -57,9 +57,13 @@ function sendWebhook(message) {
 
 /**
  * 異常通知を送る
+ * @param {string} anomalySummary - フォーマット済み異常サマリー
+ * @param {Array} anomalies - 異常リスト（criticalチェック用）
  */
-async function notifyAnomalies(anomalySummary) {
-  const message = `🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${anomalySummary}`;
+async function notifyAnomalies(anomalySummary, anomalies = []) {
+  const hasCritical = anomalies.some(a => a.severity === 'critical');
+  const mention = hasCritical ? '<@982891457000136715> ' : '';
+  const message = `${mention}🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${anomalySummary}`;
   return sendWebhook(message);
 }
 
