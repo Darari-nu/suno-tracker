@@ -59,7 +59,7 @@ async function main() {
   if (anomalies.length > 0) {
     const summary = formatAnomalySummary(anomalies);
     console.log('  異常を検知:\n' + summary);
-    await notifyAnomalies(summary);
+    await notifyAnomalies(summary, anomalies);
   } else {
     console.log('  異常なし');
   }
