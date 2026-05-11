@@ -62,3 +62,42 @@ jobs:
           git add data/
           git diff --cached --quiet || git commit -m "data: update $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
+
+  sync-2ndbrain:
+    runs-on: ubuntu-latest
+    needs: track
+    timeout-minutes: 20
+    # DARA_BRAIN_TOKEN が設定されているときだけ実行
+    if: ${{ secrets.DARA_BRAIN_TOKEN != '' }}
+
+    steps:
+      - name: Checkout suno-tracker
+        uses: actions/checkout@v4
+
+      - name: Checkout Dara_Brain
+        uses: actions/checkout@v4
+        with:
+          repository: Darari-nu/Dara_Brain
+          path: Dara_Brain
+          token: ${{ secrets.DARA_BRAIN_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npx playwright install chromium --with-deps
+
+      - name: Sync new songs to Dara_Brain
+        run: TWOBRAIN_BASE="$GITHUB_WORKSPACE/Dara_Brain/03_知識ベース/音楽" node src/sync_2ndbrain.js
+
+      - name: Commit and push to Dara_Brain
+        run: |
+          cd Dara_Brain
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "03_知識ベース/音楽/"
+          git diff --cached --quiet || git commit -m "music: sync new songs from Suno $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
