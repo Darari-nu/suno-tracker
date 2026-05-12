@@ -6019,3 +6019,12 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-05-12T17:12:26.896Z,Japanese,Weekly,coban3137,9d1157bf-f4e0-44f4-b01a-e8ae2d5ccca1,side:B,23,536,185
 2026-05-12T17:12:26.896Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5651,736
 2026-05-12T17:12:26.896Z,Japanese,All Time,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Global,Now,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Global,Weekly,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Global,Monthly,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Global,All Time,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Japanese,Now,-,-,-,0,0,0
+2026-05-12T19:53:00.560Z,Japanese,Weekly,darari_nu,c6e83917-aead-4a3e-b6aa-9f825fa1471d,The Antidote,6,876,330
+2026-05-12T19:53:00.560Z,Japanese,Weekly,coban3137,9d1157bf-f4e0-44f4-b01a-e8ae2d5ccca1,side:B,19,536,185
+2026-05-12T19:53:00.560Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5651,736
+2026-05-12T19:53:00.560Z,Japanese,All Time,-,-,-,0,0,0
