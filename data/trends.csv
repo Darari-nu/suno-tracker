@@ -6628,3 +6628,11 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-05-22T10:49:57.109Z,Japanese,Weekly,darari_nu,91ccd9fb-a61f-42ac-b7e3-26b02d00788c,遠吠え,10,485,201
 2026-05-22T10:49:57.109Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5651,736
 2026-05-22T10:49:57.109Z,Japanese,All Time,-,-,-,0,0,0
+2026-05-22T13:31:46.020Z,Global,Now,darari_nu,91ccd9fb-a61f-42ac-b7e3-26b02d00788c,遠吠え,6,569,207
+2026-05-22T13:31:46.020Z,Global,Weekly,-,-,-,0,0,0
+2026-05-22T13:31:46.020Z,Global,Monthly,-,-,-,0,0,0
+2026-05-22T13:31:46.020Z,Global,All Time,-,-,-,0,0,0
+2026-05-22T13:31:46.020Z,Japanese,Now,darari_nu,91ccd9fb-a61f-42ac-b7e3-26b02d00788c,遠吠え,2,569,207
+2026-05-22T13:31:46.020Z,Japanese,Weekly,darari_nu,91ccd9fb-a61f-42ac-b7e3-26b02d00788c,遠吠え,10,569,207
+2026-05-22T13:31:46.020Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5651,736
+2026-05-22T13:31:46.020Z,Japanese,All Time,-,-,-,0,0,0
