@@ -41,10 +41,12 @@ async function fetchTrendingViaAPI(page, region, period) {
  */
 async function checkTrending(page, region, period, artistSongIds) {
   let result;
+  let retriedSuccessfully = false;
   const maxRetries = 2;
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
       result = await fetchTrendingViaAPI(page, region, period);
+      if (attempt > 1) retriedSuccessfully = true;
       break;
     } catch (err) {
       if (attempt <= maxRetries) {
@@ -87,7 +89,8 @@ async function checkTrending(page, region, period, artistSongIds) {
     region,
     period,
     totalSongs: trendSongs.length,
-    matches
+    matches,
+    retriedSuccessfully
   };
 }
 
