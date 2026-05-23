@@ -90,13 +90,19 @@ function detectAnomalies(currentData, previousData, trendResults) {
     }
   }
 
-  // 6. トレンドチェック失敗
+  // 6. トレンドチェック失敗 / リトライ回復
   for (const result of trendResults) {
     if (!result.success) {
       anomalies.push({
         type: 'TREND_ERROR',
         severity: 'warning',
         message: `トレンド ${result.region}/${result.period} の取得に失敗: ${result.error}`
+      });
+    } else if (result.retriedSuccessfully) {
+      anomalies.push({
+        type: 'TREND_RETRY_RECOVERED',
+        severity: 'info',
+        message: `トレンド ${result.region}/${result.period}: 一時エラーが発生したがリトライで回復`
       });
     }
   }
