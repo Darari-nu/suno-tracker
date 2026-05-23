@@ -3,38 +3,63 @@ const config = require('../config.json');
 
 /**
  * SUNO Discover API でトレンド曲を取得する
- * ブラウザコンテキスト内からAPIを叩く
+ * ブラウザコンテキスト内からAPIを叩く（タイムアウト付き）
  */
 async function fetchTrendingViaAPI(page, region, period) {
   return await page.evaluate(async ({ region, period }) => {
-    const res = await fetch('https://studio-api-prod.suno.com/api/discover/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        start_index: 0,
-        page_size: 1,
-        section_name: 'trending_songs',
-        section_content: region,
-        secondary_section_content: period,
-        page: 1,
-        section_size: 50,
-        disable_shuffle: true
-      })
-    });
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    return res.json();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch('https://studio-api-prod.suno.com/api/discover/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_index: 0,
+          page_size: 1,
+          section_name: 'trending_songs',
+          section_content: region,
+          secondary_section_content: period,
+          page: 1,
+          section_size: 50,
+          disable_shuffle: true
+        }),
+        signal: controller.signal
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`API error: ${res.status} ${body.slice(0, 200)}`);
+      }
+      return res.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }, { region, period });
 }
 
 /**
- * 特定の地域×期間のトレンドをチェックし、対象アーティストの曲を探す
+ * 特定の地域×期間のトレンドをチェックし、対象アーティストの曲を探す（リトライあり）
  */
 async function checkTrending(page, region, period, artistSongIds) {
-  const result = await fetchTrendingViaAPI(page, region, period);
+  let result;
+  const maxRetries = 2;
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    try {
+      result = await fetchTrendingViaAPI(page, region, period);
+      break;
+    } catch (err) {
+      if (attempt <= maxRetries) {
+        console.warn(`[trend] ${region}/${period} 失敗 (試行${attempt}/${maxRetries + 1}): ${err.message} → 2秒後リトライ`);
+        await new Promise(r => setTimeout(r, 2000));
+      } else {
+        throw err;
+      }
+    }
+  }
 
   const section = result.sections?.[0];
   if (!section || !section.items) {
-    throw new Error('トレンドデータが取得できませんでした');
+    const keys = Object.keys(result || {}).join(', ');
+    throw new Error(`トレンドデータが取得できませんでした (レスポンスキー: ${keys})`);
   }
 
   const trendSongs = section.items;
@@ -97,6 +122,7 @@ async function checkAllTrends(artistData) {
         result.timestamp = timestamp;
         result.success = true;
         results.push(result);
+        await new Promise(r => setTimeout(r, 1000)); // レート制限対策
 
         if (result.matches.length > 0) {
           for (const m of result.matches) {
