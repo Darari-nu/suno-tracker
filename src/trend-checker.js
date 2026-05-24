@@ -59,9 +59,14 @@ async function checkTrending(page, region, period, artistSongIds) {
   }
 
   const section = result.sections?.[0];
-  if (!section || !section.items) {
-    const keys = Object.keys(result || {}).join(', ');
-    throw new Error(`トレンドデータが取得できませんでした (レスポンスキー: ${keys})`);
+  // sections が空またはitemsがない場合は「データなし」として正常扱い（エラーにしない）
+  if (!section || !section.items || section.items.length === 0) {
+    if (!result.sections) {
+      const keys = Object.keys(result || {}).join(', ');
+      throw new Error(`予期しないAPIレスポンス形式 (レスポンスキー: ${keys})`);
+    }
+    console.log(`[trend]   ${region}/${period}: データなし（sections空）`);
+    return { region, period, totalSongs: 0, matches: [], retriedSuccessfully };
   }
 
   const trendSongs = section.items;
