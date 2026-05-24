@@ -4,6 +4,7 @@ const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, save
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
 const { hasRecentNewSong, shouldRunNow } = require('./frequency-checker');
+const { syncSongsToBrain } = require('./2ndbrain-publisher');
 const config = require('../config.json');
 
 async function main() {
@@ -60,6 +61,19 @@ async function main() {
     const summary = formatAnomalySummary(anomalies);
     console.log('  異常を検知:\n' + summary);
     await notifyAnomalies(summary, anomalies);
+
+    // 新曲が検知された場合、2nd Brainに歌詞Markdownを自動同期する
+    const newSongs = anomalies.filter(a => a.type === 'NEW_SONG');
+    if (newSongs.length > 0) {
+      console.log(`\n🆕 新曲が検知されたため、2nd Brain への自動同期を開始します (${newSongs.length}件)...`);
+      try {
+        const syncTargets = newSongs.map(a => ({ songId: a.songId, handle: a.handle }));
+        const addedCount = await syncSongsToBrain(syncTargets);
+        console.log(`[index] 2nd Brain 自動同期完了: ${addedCount}曲追加`);
+      } catch (err) {
+        console.error('[index] 2nd Brain 自動同期でエラーが発生しました:', err.message);
+      }
+    }
   } else {
     console.log('  異常なし');
   }
