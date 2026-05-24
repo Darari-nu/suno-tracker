@@ -6,58 +6,24 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
-
-// 環境変数 TWOBRAIN_BASE でオーバーライド可能（GitHub Actions用）
-const TWOBRAIN_BASE = process.env.TWOBRAIN_BASE
-  || '/Users/watanabehidetaka/Claudecode/260307_2nd-Brain/03_知識ベース/音楽';
+const {
+  TWOBRAIN_BASE,
+  ARTIST_DIRS,
+  sanitizeFilename,
+  generateMd,
+  fetchClipDetail,
+} = require('./2ndbrain-publisher');
 
 const ARTISTS = [
   {
     handle: 'darari_nu',
-    dir: path.join(TWOBRAIN_BASE, 'dara', 'songs'),
+    dir: ARTIST_DIRS.darari_nu,
   },
   {
     handle: 'coban3137',
-    dir: path.join(TWOBRAIN_BASE, 'coban', 'songs'),
+    dir: ARTIST_DIRS.coban3137,
   },
 ];
-
-function sanitizeFilename(name) {
-  return name.replace(/[/\\:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
-}
-
-function formatDate(iso) {
-  if (!iso) return '不明';
-  return iso.split('T')[0];
-}
-
-function formatDuration(sec) {
-  if (!sec) return '不明';
-  const m = Math.floor(sec / 60);
-  const s = Math.round(sec % 60);
-  return `${m}:${s.toString().padStart(2, '0')} (${sec}秒)`;
-}
-
-function generateMd(data) {
-  const m = data.metadata || {};
-  const title = data.title || 'Untitled';
-  const tags = m.tags || '（なし）';
-  const negativeTags = m.negative_tags || '（なし）';
-  const prompt = m.prompt || '（なし）';
-  const displayTags = data.display_tags || '（なし）';
-  const caption = data.caption || '—';
-  const task = m.task || '不明';
-  const sliders = m.control_sliders || null;
-
-  let paramSection;
-  if (sliders && Object.keys(sliders).length > 0) {
-    paramSection = `| パラメータ | 値 |\n|-----------|-----|\n| audio_weight | ${sliders.audio_weight ?? '—'} |\n| style_weight | ${sliders.style_weight ?? '—'} |\n| weirdness_constraint | ${sliders.weirdness_constraint ?? '—'} |`;
-  } else {
-    paramSection = '生成パラメータ情報なし';
-  }
-
-  return `# ${title}\n\n## 基本情報\n\n| 項目 | 値 |\n|------|-----|\n| アーティスト | ${data.display_name} (${data.handle}) |\n| ペルソナ | ${data.persona ? data.persona.name : '—'} |\n| モデル | ${data.major_model_version} (${data.model_name}) |\n| タスク | ${task} |\n| 尺 | ${formatDuration(m.duration)} |\n| 公開日 | ${formatDate(data.created_at)} |\n| キャプション | ${caption} |\n\n## 実績\n\n| 指標 | 数値 |\n|------|------|\n| 再生数 | ${(data.play_count || 0).toLocaleString()} |\n| いいね | ${(data.upvote_count || 0).toLocaleString()} |\n| コメント | ${(data.comment_count || 0)} |\n\n## 歌詞\n\n\`\`\`\n${prompt}\n\`\`\`\n\n## スタイルプロンプト\n\n\`\`\`\n${tags}\n\`\`\`\n\n**表示タグ**: ${displayTags}\n\n## 除外プロンプト\n\n\`\`\`\n${negativeTags}\n\`\`\`\n\n## 生成パラメータ\n\n${paramSection}\n\n## リンク\n\n- [SUNO](https://suno.com/song/${data.id})\n- [MP3](https://cdn1.suno.ai/${data.id}.mp3)\n- [MP4](https://cdn1.suno.ai/${data.id}.mp4)\n`;
-}
 
 async function fetchAllClips(page, handle) {
   const allClips = [];
@@ -86,15 +52,6 @@ async function fetchAllClips(page, handle) {
   }
 
   return allClips;
-}
-
-async function fetchClipDetail(page, songId) {
-  const url = `https://studio-api-prod.suno.com/api/clip/${songId}`;
-  return page.evaluate(async (u) => {
-    const res = await fetch(u);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    return res.json();
-  }, url);
 }
 
 async function syncArtist(page, handle, dir) {
