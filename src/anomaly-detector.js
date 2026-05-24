@@ -47,6 +47,24 @@ function detectAnomalies(currentData, previousData, trendResults) {
     if (previousData && previousData[artist]) {
       const prev = previousData[artist];
 
+      // 2.5. 新曲検知 (NEW_SONG)
+      if (data.songs && prev.songs) {
+        for (const song of data.songs) {
+          const isNew = !prev.songs.some(s => s.songId === song.songId);
+          if (isNew) {
+            anomalies.push({
+              type: 'NEW_SONG',
+              severity: 'info',
+              artist,
+              songId: song.songId,
+              handle: artist,
+              message: `🆕 **新曲検知** (${artist}): "${song.title}" が新しくリリースされました！`,
+              detail: { songId: song.songId, title: song.title }
+            });
+          }
+        }
+      }
+
       // 3. 曲数減少チェック
       if (data.songCount < prev.songCount) {
         anomalies.push({
