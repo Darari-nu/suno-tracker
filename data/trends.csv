@@ -7412,3 +7412,11 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-06-04T17:48:24.835Z,Japanese,Weekly,coban3137,df2c59e1-8c9d-428c-9993-ac38b18c86b2,Blue hour,16,217,130
 2026-06-04T17:48:24.835Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5675,741
 2026-06-04T17:48:24.835Z,Japanese,All Time,-,-,-,0,0,0
+2026-06-04T20:04:55.579Z,Global,Now,coban3137,df2c59e1-8c9d-428c-9993-ac38b18c86b2,Blue hour,27,217,135
+2026-06-04T20:04:55.579Z,Global,Weekly,-,-,-,0,0,0
+2026-06-04T20:04:55.579Z,Global,Monthly,-,-,-,0,0,0
+2026-06-04T20:04:55.579Z,Global,All Time,-,-,-,0,0,0
+2026-06-04T20:04:55.579Z,Japanese,Now,coban3137,df2c59e1-8c9d-428c-9993-ac38b18c86b2,Blue hour,3,217,135
+2026-06-04T20:04:55.579Z,Japanese,Weekly,coban3137,df2c59e1-8c9d-428c-9993-ac38b18c86b2,Blue hour,15,217,135
+2026-06-04T20:04:55.579Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5675,741
+2026-06-04T20:04:55.579Z,Japanese,All Time,-,-,-,0,0,0
