@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 // 環境変数 TWOBRAIN_BASE でオーバーライド可能（デフォルトは固定パス）
 const TWOBRAIN_BASE = process.env.TWOBRAIN_BASE
@@ -117,6 +118,44 @@ ${paramSection}
 }
 
 /**
+ * MP3を指定パスにストリーミングダウンロードする。
+ * 既存ファイルは上書きしない。失敗時は途中ファイルを掃除する。
+ */
+function downloadMp3(url, destPath) {
+  return new Promise((resolve, reject) => {
+    if (fs.existsSync(destPath)) {
+      return resolve({ skipped: true });
+    }
+    const tmpPath = destPath + '.tmp';
+    const file = fs.createWriteStream(tmpPath);
+    const req = https.get(url, (res) => {
+      if (res.statusCode === 302 || res.statusCode === 301) {
+        file.close();
+        fs.unlink(tmpPath, () => {});
+        return downloadMp3(res.headers.location, destPath).then(resolve, reject);
+      }
+      if (res.statusCode !== 200) {
+        file.close();
+        fs.unlink(tmpPath, () => {});
+        return reject(new Error(`MP3 download failed: HTTP ${res.statusCode}`));
+      }
+      res.pipe(file);
+      file.on('finish', () => {
+        file.close((err) => {
+          if (err) return reject(err);
+          fs.rename(tmpPath, destPath, (e) => e ? reject(e) : resolve({ skipped: false }));
+        });
+      });
+    });
+    req.on('error', (err) => {
+      file.close();
+      fs.unlink(tmpPath, () => {});
+      reject(err);
+    });
+  });
+}
+
+/**
  * Suno APIから特定の曲の詳細データを取得する
  */
 async function fetchClipDetail(page, songId) {
@@ -129,14 +168,15 @@ async function fetchClipDetail(page, songId) {
 }
 
 /**
- * 新曲リストを 2nd Brain に同期する
+ * 新曲リストを 2nd Brain に同期する。
+ * 併せて、SRT自動生成のdispatch用に各曲の詳細（歌詞含む）を集めて返す。
  * @param {Array<{songId: string, handle: string}>} targetSongs
- * @returns {Promise<number>} 追加に成功した曲数
+ * @returns {Promise<{added: number, songs: Array<{songId: string, handle: string, songName: string, title: string, lyrics: string, mp3Url: string}>}>}
  */
 async function syncSongsToBrain(targetSongs) {
   if (!targetSongs || targetSongs.length === 0) {
     console.log('[2ndbrain-publisher] 同期対象の曲はありません。');
-    return 0;
+    return { added: 0, songs: [] };
   }
 
   console.log(`[2ndbrain-publisher] ${targetSongs.length}曲の歌詞同期を開始します...`);
@@ -152,6 +192,7 @@ async function syncSongsToBrain(targetSongs) {
     await page.waitForTimeout(2000);
 
     let added = 0;
+    const syncedSongs = [];
 
     for (let i = 0; i < targetSongs.length; i++) {
       const { songId, handle } = targetSongs[i];
@@ -162,22 +203,53 @@ async function syncSongsToBrain(targetSongs) {
         continue;
       }
 
-      fs.mkdirSync(dir, { recursive: true });
-
       try {
         const detail = await fetchClipDetail(page, songId);
-        const filename = sanitizeFilename(detail.title || 'Untitled') + '.md';
-        const destPath = path.join(dir, filename);
+        const songName = sanitizeFilename(detail.title || 'Untitled');
+        const mp3Url = `https://cdn1.suno.ai/${detail.id}.mp3`;
 
-        // 既存ファイルの重複チェック
-        if (fs.existsSync(destPath)) {
-          console.log(`    [${i+1}/${targetSongs.length}] SKIP: 既に存在します: ${detail.title}`);
-          continue;
+        // SRT自動生成のdispatch用に詳細を先に収集（歌詞は metadata.prompt）。
+        // 以降のローカル保存(MD/MP3)が失敗してもdispatchできるよう、ここで確定させる。
+        syncedSongs.push({
+          songId,
+          handle,
+          songName,
+          title: detail.title || 'Untitled',
+          lyrics: (detail.metadata && detail.metadata.prompt) || '',
+          mp3Url,
+        });
+
+        // --- ローカル 2nd Brain への保存（ベストエフォート）---
+        // GitHub Actions などローカルパスが無い環境では失敗してもよい（dispatchは上で確定済み）
+        try {
+          const songDir = path.join(dir, songName);
+          const mdPath = path.join(songDir, `${songName}.md`);
+          const mp3Path = path.join(songDir, `${songName}.mp3`);
+          fs.mkdirSync(songDir, { recursive: true });
+
+          // 既存ファイルの重複チェック（MDが既にあればスキップ。MP3だけ別途試す）
+          if (fs.existsSync(mdPath)) {
+            console.log(`    [${i+1}/${targetSongs.length}] SKIP MD: 既に存在します: ${detail.title}`);
+          } else {
+            fs.writeFileSync(mdPath, generateMd(detail), 'utf-8');
+            console.log(`    [${i+1}/${targetSongs.length}] SYNC MD: ${detail.title} (${handle})`);
+            added++;
+          }
+
+          // MP3 自動ダウンロード（既存ならスキップ）
+          try {
+            const result = await downloadMp3(mp3Url, mp3Path);
+            if (result.skipped) {
+              console.log(`    [${i+1}/${targetSongs.length}] SKIP MP3: 既に存在: ${songName}.mp3`);
+            } else {
+              console.log(`    [${i+1}/${targetSongs.length}] DL MP3: ${songName}.mp3`);
+            }
+          } catch (e) {
+            console.error(`    [${i+1}/${targetSongs.length}] FAIL MP3: ${songName} - ${e.message}`);
+          }
+        } catch (e) {
+          console.error(`    [${i+1}/${targetSongs.length}] SKIP ローカル保存（パス利用不可など）: ${songName} - ${e.message}`);
         }
-
-        fs.writeFileSync(destPath, generateMd(detail), 'utf-8');
-        console.log(`    [${i+1}/${targetSongs.length}] SYNC: ${detail.title} (${handle})`);
-        added++;
       } catch (e) {
         console.error(`    [${i+1}/${targetSongs.length}] FAIL: songId ${songId} (${handle}) - ${e.message}`);
       }
@@ -188,7 +260,7 @@ async function syncSongsToBrain(targetSongs) {
     }
 
     console.log(`[2ndbrain-publisher] 歌詞同期完了: ${added}曲追加しました。`);
-    return added;
+    return { added, songs: syncedSongs };
   } finally {
     await browser.close();
   }
