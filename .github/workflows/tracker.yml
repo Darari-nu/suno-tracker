@@ -53,6 +53,10 @@ jobs:
           done
 
       - name: Run tracker
+        env:
+          # 新曲検知時に vocal-srt-generator へ repository_dispatch するためのトークン。
+          # 未設定なら srt-dispatcher が安全にスキップする（既存の毎時実行は壊れない）。
+          REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
         run: node src/index.js
 
       - name: Commit and push data
