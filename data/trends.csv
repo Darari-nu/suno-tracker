@@ -10166,3 +10166,12 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-07-17T21:52:35.330Z,Japanese,Weekly,darari_nu,7e0f15d1-7945-4677-9af7-9de28604e10c,Cinderella,19,574,198
 2026-07-17T21:52:35.330Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5739,752
 2026-07-17T21:52:35.330Z,Japanese,All Time,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Global,Now,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Global,Weekly,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Global,Monthly,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Global,All Time,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Japanese,Now,-,-,-,0,0,0
+2026-07-17T22:48:42.269Z,Japanese,Weekly,coban3137,a2dc14b2-c50b-4e1e-b702-ec7493e27980,素数,15,448,206
+2026-07-17T22:48:42.269Z,Japanese,Weekly,darari_nu,7e0f15d1-7945-4677-9af7-9de28604e10c,Cinderella,19,574,198
+2026-07-17T22:48:42.269Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5739,752
+2026-07-17T22:48:42.269Z,Japanese,All Time,-,-,-,0,0,0
