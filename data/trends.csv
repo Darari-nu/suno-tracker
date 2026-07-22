@@ -10598,3 +10598,11 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-07-21T23:55:10.429Z,Japanese,Weekly,coban3137,a2dc14b2-c50b-4e1e-b702-ec7493e27980,素数,13,572,219
 2026-07-21T23:55:10.429Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5812,755
 2026-07-21T23:55:10.429Z,Japanese,All Time,-,-,-,0,0,0
+2026-07-22T02:31:09.477Z,Global,Now,-,-,-,0,0,0
+2026-07-22T02:31:09.477Z,Global,Weekly,-,-,-,0,0,0
+2026-07-22T02:31:09.477Z,Global,Monthly,-,-,-,0,0,0
+2026-07-22T02:31:09.477Z,Global,All Time,-,-,-,0,0,0
+2026-07-22T02:31:09.477Z,Japanese,Now,coban3137,a2dc14b2-c50b-4e1e-b702-ec7493e27980,素数,14,572,219
+2026-07-22T02:31:09.477Z,Japanese,Weekly,coban3137,a2dc14b2-c50b-4e1e-b702-ec7493e27980,素数,14,572,219
+2026-07-22T02:31:09.477Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,13,5812,755
+2026-07-22T02:31:09.477Z,Japanese,All Time,-,-,-,0,0,0
