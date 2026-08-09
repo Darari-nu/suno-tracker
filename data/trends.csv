@@ -12230,3 +12230,11 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-08-09T01:37:15.289Z,Japanese,Weekly,-,-,-,0,0,0
 2026-08-09T01:37:15.289Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,12,5827,757
 2026-08-09T01:37:15.289Z,Japanese,All Time,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Global,Now,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Global,Weekly,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Global,Monthly,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Global,All Time,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Japanese,Now,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Japanese,Weekly,-,-,-,0,0,0
+2026-08-09T03:40:38.569Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,12,5827,757
+2026-08-09T03:40:38.569Z,Japanese,All Time,-,-,-,0,0,0
