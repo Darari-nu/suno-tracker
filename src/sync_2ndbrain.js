@@ -7,11 +7,11 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const {
-  TWOBRAIN_BASE,
   ARTIST_DIRS,
   sanitizeFilename,
   generateMd,
   fetchClipDetail,
+  downloadMp3,
 } = require('./2ndbrain-publisher');
 
 const ARTISTS = [
@@ -54,12 +54,28 @@ async function fetchAllClips(page, handle) {
   return allClips;
 }
 
+function listExistingSongs(dir) {
+  // 新構造: dir/{曲名}/{曲名}.md があるサブフォルダ名を集める
+  // 旧構造: dir/{曲名}.md も互換用に含める（移行期）
+  const existing = new Set();
+  if (!fs.existsSync(dir)) return existing;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('_')) continue;
+    if (entry.isDirectory()) {
+      const name = entry.name;
+      // 念のためmd実在チェック
+      if (fs.existsSync(path.join(dir, name, `${name}.md`))) {
+        existing.add(name);
+      }
+    } else if (entry.isFile() && entry.name.endsWith('.md')) {
+      existing.add(entry.name.replace(/\.md$/, ''));
+    }
+  }
+  return existing;
+}
+
 async function syncArtist(page, handle, dir) {
-  const existingFiles = new Set(
-    fs.readdirSync(dir)
-      .filter(f => f.endsWith('.md') && !f.startsWith('_'))
-      .map(f => f.replace(/\.md$/, ''))
-  );
+  const existingFiles = listExistingSongs(dir);
   console.log(`  既存ファイル: ${existingFiles.size}曲`);
 
   const allClips = await fetchAllClips(page, handle);
@@ -76,10 +92,18 @@ async function syncArtist(page, handle, dir) {
     const clip = newClips[i];
     try {
       const detail = await fetchClipDetail(page, clip.id);
-      const filename = sanitizeFilename(detail.title || 'Untitled') + '.md';
-      fs.writeFileSync(path.join(dir, filename), generateMd(detail));
-      console.log(`    [${i+1}/${newClips.length}] 追加: ${detail.title}`);
+      const songName = sanitizeFilename(detail.title || 'Untitled');
+      const songDir = path.join(dir, songName);
+      fs.mkdirSync(songDir, { recursive: true });
+      fs.writeFileSync(path.join(songDir, `${songName}.md`), generateMd(detail));
+      console.log(`    [${i+1}/${newClips.length}] MD: ${detail.title}`);
       added++;
+      try {
+        const result = await downloadMp3(`https://cdn1.suno.ai/${detail.id}.mp3`, path.join(songDir, `${songName}.mp3`));
+        console.log(`    [${i+1}/${newClips.length}] MP3: ${result.skipped ? 'SKIP' : 'DL'} ${songName}.mp3`);
+      } catch (e) {
+        console.error(`    [${i+1}/${newClips.length}] FAIL MP3: ${songName} - ${e.message}`);
+      }
     } catch (e) {
       console.error(`    [${i+1}/${newClips.length}] FAIL: ${clip.title} - ${e.message}`);
     }

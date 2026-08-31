@@ -2,6 +2,10 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { execFile } = require('child_process');
+
+// MP3がこのステータスで拒否されたらMP4フォールバックに切り替える
+const MP3_FALLBACK_STATUSES = [401, 403, 404];
 
 // 環境変数 TWOBRAIN_BASE でオーバーライド可能（デフォルトは固定パス）
 const TWOBRAIN_BASE = process.env.TWOBRAIN_BASE
@@ -118,41 +122,92 @@ ${paramSection}
 }
 
 /**
- * MP3を指定パスにストリーミングダウンロードする。
- * 既存ファイルは上書きしない。失敗時は途中ファイルを掃除する。
+ * URLを指定パスにストリーミングダウンロードする（リダイレクト追従つき）。
+ * 200以外は statusCode を持たせた Error で reject する。失敗時は途中ファイルを掃除する。
  */
-function downloadMp3(url, destPath) {
+function streamDownload(url, destPath) {
   return new Promise((resolve, reject) => {
-    if (fs.existsSync(destPath)) {
-      return resolve({ skipped: true });
-    }
     const tmpPath = destPath + '.tmp';
     const file = fs.createWriteStream(tmpPath);
+    // res を渡した場合は resume() で本文を捨てる。読み捨てないとソケットが解放されず、
+    // 403フォールバック後にプロセスが終了しなくなる。
+    const cleanup = (res) => {
+      if (res) res.resume();
+      file.close();
+      fs.unlink(tmpPath, () => {});
+    };
     const req = https.get(url, (res) => {
       if (res.statusCode === 302 || res.statusCode === 301) {
-        file.close();
-        fs.unlink(tmpPath, () => {});
-        return downloadMp3(res.headers.location, destPath).then(resolve, reject);
+        cleanup(res);
+        return streamDownload(res.headers.location, destPath).then(resolve, reject);
       }
       if (res.statusCode !== 200) {
-        file.close();
-        fs.unlink(tmpPath, () => {});
-        return reject(new Error(`MP3 download failed: HTTP ${res.statusCode}`));
+        cleanup(res);
+        const err = new Error(`download failed: HTTP ${res.statusCode} (${url})`);
+        err.statusCode = res.statusCode;
+        return reject(err);
       }
       res.pipe(file);
       file.on('finish', () => {
         file.close((err) => {
           if (err) return reject(err);
-          fs.rename(tmpPath, destPath, (e) => e ? reject(e) : resolve({ skipped: false }));
+          fs.rename(tmpPath, destPath, (e) => e ? reject(e) : resolve());
         });
       });
     });
     req.on('error', (err) => {
-      file.close();
-      fs.unlink(tmpPath, () => {});
+      cleanup();
       reject(err);
     });
   });
+}
+
+/**
+ * MP4から音声トラックだけをMP3として抜き出す（ffmpegが必要）。
+ */
+function extractAudioFromMp4(mp4Path, destPath) {
+  return new Promise((resolve, reject) => {
+    const tmpPath = destPath + '.tmp';
+    // 出力先が .tmp 拡張子なので -f mp3 で明示（拡張子からフォーマットを推定できない）
+    execFile('ffmpeg', [
+      '-v', 'error', '-y', '-i', mp4Path, '-vn',
+      '-acodec', 'libmp3lame', '-q:a', '2', '-f', 'mp3', tmpPath,
+    ], (err) => {
+      if (err) {
+        fs.unlink(tmpPath, () => {});
+        return reject(err);
+      }
+      fs.rename(tmpPath, destPath, (e) => e ? reject(e) : resolve());
+    });
+  });
+}
+
+/**
+ * MP3を指定パスに保存する。既存ファイルは上書きしない。
+ *
+ * SUNOは2026-08末に cdn1.suno.ai のMP3直リンクをCloudFrontの署名付きURL必須にした。
+ * 未認証だと 403 MissingKey が返り、APIの audio_url も /api/forbidden に差し替えられている。
+ * 一方MP4（曲の再生用動画）は素のURLのまま落とせるので、MP3が拒否されたらMP4を取って
+ * ffmpegで音声トラックだけ抜き出す。音声は同じマスター由来なので実質劣化しない。
+ * 詳細は tama の memory/facts/suno-cdn-signed-url.md を参照。
+ */
+async function downloadMp3(url, destPath) {
+  if (fs.existsSync(destPath)) return { skipped: true };
+  try {
+    await streamDownload(url, destPath);
+    return { skipped: false, viaMp4: false };
+  } catch (e) {
+    const mp4Url = url.replace(/\.mp3$/, '.mp4');
+    if (!MP3_FALLBACK_STATUSES.includes(e.statusCode) || mp4Url === url) throw e;
+    const mp4Path = destPath + '.fallback.mp4';
+    try {
+      await streamDownload(mp4Url, mp4Path);
+      await extractAudioFromMp4(mp4Path, destPath);
+      return { skipped: false, viaMp4: true };
+    } finally {
+      if (fs.existsSync(mp4Path)) fs.unlinkSync(mp4Path);
+    }
+  }
 }
 
 /**
@@ -275,4 +330,5 @@ module.exports = {
   generateMd,
   fetchClipDetail,
   syncSongsToBrain,
+  downloadMp3,
 };
