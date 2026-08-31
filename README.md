@@ -6,19 +6,40 @@ SUNOアーティストの楽曲データを定期的に取得・蓄積し、グ�
 
 https://darari-nu.github.io/suno-tracker/dashboard/
 
-## 仕組み
+## このリポジトリの役割
+
+**統計の収集・ダッシュボード配信・新曲の検知通知。それだけ。**
+歌詞のMarkdownやSRT字幕は別のリポジトリが作る（下の全体像を参照）。
 
 ```
-GitHub Actions（3時間ごと）
+GitHub Actions（tracker.yml・毎時。新曲が無ければ3時間おきにスキップ）
   ↓ SUNO Profile API で全曲データ+フォロワー数取得
   ↓ SUNO Discover API でトレンドチェック（8パターン）
   ↓ data/*.csv を更新 → 自動コミット＆プッシュ
   ↓ 異常検知時は Discord に通知
+  ↓ 新曲を検知したら、歌詞などを集めて vocal-srt-generator へ repository_dispatch
 
 GitHub Pages
-  ↓ dashboard/ を公開（ライトテーマ、Applify風デザイン）
+  ↓ dashboard/ を公開
   ↓ data/ のCSVを自動読み込み → グラフ表示
 ```
+
+## 全体像（誰がいつ何を作るか）
+
+| 実行するリポジトリ | いつ | やること | 成果物の行き先 |
+|---|---|---|---|
+| **suno-tracker**（ここ・PUBLIC） | 毎時 | 統計収集・新曲検知・dispatch | `data/*.csv`（自リポ）＋ Pagesのダッシュボード |
+| **260525_vocal-srt-generator**（PRIVATE） | 新曲のdispatch時 | 音源分離→歌詞の聞き取り→SRT/beats生成 | `Dara_Brain/{曲名}/srt/` |
+| **Dara_Brain**（PRIVATE） | 毎日 15:30 JST | このリポの `src/sync_2ndbrain.js` を実行 | `Dara_Brain/{曲名}/{曲名}.md`（曲のカルテ） |
+
+MP3は**どのCIも保存しない**（Dara_Brainの`.gitignore`で弾かれるため保存できない）。
+音源が手元に欲しいときは下記の `fetch_mp3.js` を使う。
+
+## このリポジトリのコピーを他所に作らないこと
+
+正本はこの1つだけ。ローカル作業場所は `~/Claudecode/suno-tracker`。
+以前は別リポに開発用コピーを置いて手で同期していたが、3ヶ月分の乖離が発生したため
+2026-08-31に廃止した。コピーを作った瞬間に同じ問題が再発する。
 
 ## セットアップ（GitHub Actions）
 
@@ -36,6 +57,18 @@ Settings → Pages → Source: `Deploy from a branch` → Branch: `main` / `/ (r
 
 ### 4. 動作確認
 Actions タブ → SUNO Tracker → Run workflow
+
+## 音源(MP3)が手元に欲しいとき
+
+```bash
+node src/fetch_mp3.js "曲名"      # 部分一致で1曲（既定の保存先: ~/Music/SUNO）
+node src/fetch_mp3.js --all       # 全曲
+node src/fetch_mp3.js "曲名" --out ~/どこか
+```
+
+SUNOは2026-08末にMP3の直リンクを署名付きURL必須（未認証だと403）にしたため、
+403のときは同じIDのMP4を落として ffmpeg で音声だけ抜くフォールバックが働く。
+**ffmpegが必要**（`brew install ffmpeg`）。
 
 ## ローカルで実行する場合
 
