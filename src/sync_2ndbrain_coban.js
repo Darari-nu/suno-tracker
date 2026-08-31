@@ -7,9 +7,11 @@ const fs = require('fs');
 const path = require('path');
 
 const COBAN_HANDLE = 'coban3137';
-const TWOBRAIN_COBAN_DIR = '/Users/watanabehidetaka/Claudecode/260307_2nd-Brain/03_知識ベース/音楽/coban/songs';
-
-const { downloadMp3 } = require('./2ndbrain-publisher');
+// 保存先は TWOBRAIN_BASE で差し替えられる（sync-music.yml はこれを渡してくる）。
+// suno-tracker側が特定のPCのフォルダ構成を知っている必要はない。
+const TWOBRAIN_BASE = process.env.TWOBRAIN_BASE
+  || '/Users/watanabehidetaka/Claudecode/260307_2nd-Brain/03_知識ベース/音楽';
+const TWOBRAIN_COBAN_DIR = path.join(TWOBRAIN_BASE, 'coban', 'songs');
 
 function listExistingSongs(dir) {
   const existing = new Set();
@@ -199,12 +201,7 @@ async function main() {
       fs.writeFileSync(path.join(songDir, `${songName}.md`), generateMd(detail));
       console.log(`[${i+1}/${newClips.length}] MD: ${detail.title}`);
       added++;
-      try {
-        const result = await downloadMp3(`https://cdn1.suno.ai/${detail.id}.mp3`, path.join(songDir, `${songName}.mp3`));
-        console.log(`[${i+1}/${newClips.length}] MP3: ${result.skipped ? 'SKIP' : 'DL'} ${songName}.mp3`);
-      } catch (e) {
-        console.error(`[${i+1}/${newClips.length}] FAIL MP3: ${songName} - ${e.message}`);
-      }
+      // MP3はここでは落とさない（理由は sync_2ndbrain.js の同じ箇所を参照）
     } catch (e) {
       console.error(`[${i+1}/${newClips.length}] FAIL: ${clip.title} - ${e.message}`);
     }

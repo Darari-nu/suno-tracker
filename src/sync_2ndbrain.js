@@ -11,7 +11,6 @@ const {
   sanitizeFilename,
   generateMd,
   fetchClipDetail,
-  downloadMp3,
 } = require('./2ndbrain-publisher');
 
 const ARTISTS = [
@@ -98,12 +97,9 @@ async function syncArtist(page, handle, dir) {
       fs.writeFileSync(path.join(songDir, `${songName}.md`), generateMd(detail));
       console.log(`    [${i+1}/${newClips.length}] MD: ${detail.title}`);
       added++;
-      try {
-        const result = await downloadMp3(`https://cdn1.suno.ai/${detail.id}.mp3`, path.join(songDir, `${songName}.mp3`));
-        console.log(`    [${i+1}/${newClips.length}] MP3: ${result.skipped ? 'SKIP' : 'DL'} ${songName}.mp3`);
-      } catch (e) {
-        console.error(`    [${i+1}/${newClips.length}] FAIL MP3: ${songName} - ${e.message}`);
-      }
+      // MP3はここでは落とさない。Dara_Brainの.gitignoreに *.mp3 があるため、
+      // CIで落としても一度もcommitされず毎回捨てられていた（2026-08-31に廃止）。
+      // 手元に音源が欲しいときは `node src/fetch_mp3.js "曲名"` を使う。
     } catch (e) {
       console.error(`    [${i+1}/${newClips.length}] FAIL: ${clip.title} - ${e.message}`);
     }
