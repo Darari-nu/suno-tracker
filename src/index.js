@@ -4,7 +4,7 @@ const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, save
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
 const { hasRecentNewSong, shouldRunNow } = require('./frequency-checker');
-const { syncSongsToBrain } = require('./2ndbrain-publisher');
+const { collectSongDetails } = require('./2ndbrain-publisher');
 const { dispatchSrtGeneration } = require('./srt-dispatcher');
 const config = require('../config.json');
 
@@ -63,19 +63,18 @@ async function main() {
     console.log('  異常を検知:\n' + summary);
     await notifyAnomalies(summary, anomalies);
 
-    // 新曲が検知された場合、2nd Brainに歌詞Markdownを自動同期する
+    // 新曲が検知された場合、SRT自動生成をdispatchする（歌詞などの材料を集めてから渡す）
     const newSongs = anomalies.filter(a => a.type === 'NEW_SONG');
     if (newSongs.length > 0) {
-      console.log(`\n🆕 新曲が検知されたため、2nd Brain への自動同期を開始します (${newSongs.length}件)...`);
+      console.log(`\n🆕 新曲を検知したため、SRT自動生成の準備を開始します (${newSongs.length}件)...`);
       try {
-        const syncTargets = newSongs.map(a => ({ songId: a.songId, handle: a.handle }));
-        const { added, songs } = await syncSongsToBrain(syncTargets);
-        console.log(`[index] 2nd Brain 自動同期完了: ${added}曲追加`);
+        const targets = newSongs.map(a => ({ songId: a.songId, handle: a.handle }));
+        const { songs } = await collectSongDetails(targets);
 
         // 新曲のSRT/JSON/beatsをクラウドで自動生成（vocal-srt-generatorへdispatch）
         await dispatchSrtGeneration(songs);
       } catch (err) {
-        console.error('[index] 2nd Brain 自動同期でエラーが発生しました:', err.message);
+        console.error('[index] 新曲の詳細取得/dispatchでエラーが発生しました:', err.message);
       }
     }
   } else {

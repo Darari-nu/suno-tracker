@@ -223,20 +223,25 @@ async function fetchClipDetail(page, songId) {
 }
 
 /**
- * 新曲リストを 2nd Brain に同期する。
- * 併せて、SRT自動生成のdispatch用に各曲の詳細（歌詞含む）を集めて返す。
+ * 新曲の詳細（歌詞含む）を集めて返す。ファイルは一切書かない。
+ *
+ * 毎時の tracker.yml から呼ばれる。以前はここで 2nd Brain のローカル絶対パスに
+ * MD/MP3 を書こうとしていたが、CIランナー上にそのパスは存在せず、try/catchで
+ * 握り潰されて毎回黙ってスキップされていた（＝死んだコード）。
+ * 知識ベースへのMD同期は Dara_Brain 側の sync-music.yml（毎日）が担当する。
+ * この関数の唯一の役目は、SRT自動生成をdispatchするための材料集めである。
+ *
  * @param {Array<{songId: string, handle: string}>} targetSongs
- * @returns {Promise<{added: number, songs: Array<{songId: string, handle: string, songName: string, title: string, lyrics: string, mp3Url: string}>}>}
+ * @returns {Promise<{songs: Array<{songId: string, handle: string, songName: string, title: string, lyrics: string, mp3Url: string}>}>}
  */
-async function syncSongsToBrain(targetSongs) {
+async function collectSongDetails(targetSongs) {
   if (!targetSongs || targetSongs.length === 0) {
-    console.log('[2ndbrain-publisher] 同期対象の曲はありません。');
-    return { added: 0, songs: [] };
+    console.log('[song-detail] 対象の曲はありません。');
+    return { songs: [] };
   }
 
-  console.log(`[2ndbrain-publisher] ${targetSongs.length}曲の歌詞同期を開始します...`);
+  console.log(`[song-detail] ${targetSongs.length}曲の詳細取得を開始します...`);
 
-  // 新規 Playwright セッションの起動
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -246,65 +251,21 @@ async function syncSongsToBrain(targetSongs) {
     await page.goto('https://suno.com', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
 
-    let added = 0;
-    const syncedSongs = [];
+    const songs = [];
 
     for (let i = 0; i < targetSongs.length; i++) {
       const { songId, handle } = targetSongs[i];
-      const dir = ARTIST_DIRS[handle];
-
-      if (!dir) {
-        console.error(`[2ndbrain-publisher] [${i+1}/${targetSongs.length}] FAIL: 未定義のアーティストハンドル: ${handle}`);
-        continue;
-      }
-
       try {
         const detail = await fetchClipDetail(page, songId);
-        const songName = sanitizeFilename(detail.title || 'Untitled');
-        const mp3Url = `https://cdn1.suno.ai/${detail.id}.mp3`;
-
-        // SRT自動生成のdispatch用に詳細を先に収集（歌詞は metadata.prompt）。
-        // 以降のローカル保存(MD/MP3)が失敗してもdispatchできるよう、ここで確定させる。
-        syncedSongs.push({
+        songs.push({
           songId,
           handle,
-          songName,
+          songName: sanitizeFilename(detail.title || 'Untitled'),
           title: detail.title || 'Untitled',
-          lyrics: (detail.metadata && detail.metadata.prompt) || '',
-          mp3Url,
+          lyrics: (detail.metadata && detail.metadata.prompt) || '',  // 歌詞は metadata.prompt
+          mp3Url: `https://cdn1.suno.ai/${detail.id}.mp3`,
         });
-
-        // --- ローカル 2nd Brain への保存（ベストエフォート）---
-        // GitHub Actions などローカルパスが無い環境では失敗してもよい（dispatchは上で確定済み）
-        try {
-          const songDir = path.join(dir, songName);
-          const mdPath = path.join(songDir, `${songName}.md`);
-          const mp3Path = path.join(songDir, `${songName}.mp3`);
-          fs.mkdirSync(songDir, { recursive: true });
-
-          // 既存ファイルの重複チェック（MDが既にあればスキップ。MP3だけ別途試す）
-          if (fs.existsSync(mdPath)) {
-            console.log(`    [${i+1}/${targetSongs.length}] SKIP MD: 既に存在します: ${detail.title}`);
-          } else {
-            fs.writeFileSync(mdPath, generateMd(detail), 'utf-8');
-            console.log(`    [${i+1}/${targetSongs.length}] SYNC MD: ${detail.title} (${handle})`);
-            added++;
-          }
-
-          // MP3 自動ダウンロード（既存ならスキップ）
-          try {
-            const result = await downloadMp3(mp3Url, mp3Path);
-            if (result.skipped) {
-              console.log(`    [${i+1}/${targetSongs.length}] SKIP MP3: 既に存在: ${songName}.mp3`);
-            } else {
-              console.log(`    [${i+1}/${targetSongs.length}] DL MP3: ${songName}.mp3`);
-            }
-          } catch (e) {
-            console.error(`    [${i+1}/${targetSongs.length}] FAIL MP3: ${songName} - ${e.message}`);
-          }
-        } catch (e) {
-          console.error(`    [${i+1}/${targetSongs.length}] SKIP ローカル保存（パス利用不可など）: ${songName} - ${e.message}`);
-        }
+        console.log(`    [${i+1}/${targetSongs.length}] OK: ${detail.title} (${handle})`);
       } catch (e) {
         console.error(`    [${i+1}/${targetSongs.length}] FAIL: songId ${songId} (${handle}) - ${e.message}`);
       }
@@ -314,8 +275,8 @@ async function syncSongsToBrain(targetSongs) {
       }
     }
 
-    console.log(`[2ndbrain-publisher] 歌詞同期完了: ${added}曲追加しました。`);
-    return { added, songs: syncedSongs };
+    console.log(`[song-detail] 詳細取得完了: ${songs.length}/${targetSongs.length}曲`);
+    return { songs };
   } finally {
     await browser.close();
   }
@@ -329,6 +290,6 @@ module.exports = {
   formatDuration,
   generateMd,
   fetchClipDetail,
-  syncSongsToBrain,
+  collectSongDetails,
   downloadMp3,
 };
