@@ -15342,3 +15342,11 @@ timestamp,region,period,artist,songId,title,rank,plays,likes
 2026-09-04T22:07:13.162Z,Japanese,Weekly,coban3137,6cdb38e4-7669-470a-8b8e-bffe9dfbe1b8,Clock Drift,14,172,113
 2026-09-04T22:07:13.162Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,12,5835,758
 2026-09-04T22:07:13.162Z,Japanese,All Time,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Global,Now,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Global,Weekly,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Global,Monthly,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Global,All Time,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Japanese,Now,-,-,-,0,0,0
+2026-09-05T00:36:56.542Z,Japanese,Weekly,coban3137,6cdb38e4-7669-470a-8b8e-bffe9dfbe1b8,Clock Drift,14,180,113
+2026-09-05T00:36:56.542Z,Japanese,Monthly,coban3137,79cf91bc-167e-481f-9a49-b581919560c4,BINARY,12,5835,758
+2026-09-05T00:36:56.542Z,Japanese,All Time,-,-,-,0,0,0
