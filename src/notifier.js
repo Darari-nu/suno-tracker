@@ -1,6 +1,8 @@
 const https = require('https');
 const http = require('http');
 const config = require('../config.json');
+const { formatAnomalySummary } = require('./anomaly-detector');
+const { artistDisplay } = require('./daily-report');
 
 /**
  * Discord Webhook にメッセージを送信する
@@ -55,72 +57,37 @@ function sendWebhook(message) {
   });
 }
 
+// 即時に送る type（これ以外は run-log に残り、日報の「注意」に出る）
+const IMMEDIATE_TYPES = ['FETCH_ERROR', 'NO_SONGS', 'API_FALLBACK', 'SONG_COUNT_DECREASE', 'NEW_SONG_BURST', 'ALL_TRENDS_FAILED', 'NEW_SONG'];
+
 /**
- * 異常通知を送る
- * @param {string} anomalySummary - フォーマット済み異常サマリー
- * @param {Array} anomalies - 異常リスト（メンション判定用）
+ * 即時通知の本文を作る。送るものが無ければ null。
  */
-async function notifyAnomalies(anomalySummary, anomalies = []) {
-  const needsMention = anomalies.some(a => a.type === 'FETCH_ERROR' || a.type === 'ALL_TRENDS_FAILED');
+function buildImmediateMessage(anomalies = []) {
+  const immediate = anomalies.filter(a => IMMEDIATE_TYPES.includes(a.type));
+  if (immediate.length === 0) return null;
+
+  // 新曲だけのときは短い1通
+  if (immediate.every(a => a.type === 'NEW_SONG')) {
+    return immediate
+      .map(a => `🆕 新曲：「${(a.detail && a.detail.title) || a.songId}」(${artistDisplay(a.artist)})`)
+      .join('\n');
+  }
+
+  const needsMention = immediate.some(a => a.type === 'FETCH_ERROR' || a.type === 'ALL_TRENDS_FAILED');
   const mention = needsMention ? '<@982891457000136715> ' : '';
-  const message = `${mention}🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${anomalySummary}`;
-  return sendWebhook(message);
+  return `${mention}🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${formatAnomalySummary(immediate)}`;
 }
 
 /**
- * 定期レポートを送る
+ * 異常通知を送る（IMMEDIATE_TYPES に該当するものだけ）
+ * @param {Array} anomalies - 異常リスト
+ * @param {Function} [send] - 送信関数（テストでスタブ可）
  */
-async function notifyDailyReport(artistData, trendResults) {
-  let message = `📊 **SUNO Tracker 定期レポート**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n`;
-
-  // 各アーティストのサマリー
-  for (const [artist, data] of Object.entries(artistData)) {
-    if (!data.success) {
-      message += `**${artist}**: データ取得失敗\n`;
-      continue;
-    }
-    const totalPlays = data.songs.reduce((sum, s) => sum + s.plays, 0);
-    const totalLikes = data.songs.reduce((sum, s) => sum + s.likes, 0);
-    message += `**${artist}**: ${data.songCount}曲 / 総再生${totalPlays.toLocaleString()} / 総いいね${totalLikes.toLocaleString()}\n`;
-
-    // Top3
-    const top3 = [...data.songs].sort((a, b) => b.plays - a.plays).slice(0, 3);
-    for (let i = 0; i < top3.length; i++) {
-      message += `  ${i + 1}. ${top3[i].title} (${top3[i].plays.toLocaleString()}再生)\n`;
-    }
-    message += '\n';
-  }
-
-  // トレンドランクイン
-  const allMatches = trendResults.flatMap(r => r.matches || []).filter(m => m);
-  if (allMatches.length > 0) {
-    message += '🏆 **トレンドランクイン**\n';
-    for (const m of allMatches) {
-      message += `- ${m.artist} "${m.title}" (${m.rank}位)\n`;
-    }
-  } else {
-    message += 'トレンドランクイン: なし\n';
-  }
-
-  message += '\n✅ 異常なし';
-  return sendWebhook(message);
+async function notifyAnomalies(anomalies = [], send = sendWebhook) {
+  const message = buildImmediateMessage(anomalies);
+  if (!message) return false;
+  return send(message);
 }
 
-/**
- * 正常完了の簡易通知（3時間ごとの定期実行時）
- */
-async function notifySuccess(artistData) {
-  // 定期レポートの時間かどうかチェック
-  const now = new Date();
-  const hour = now.getHours();
-
-  if (hour === config.schedule.dailyReportHour) {
-    return false; // 定期レポート時間は別途送信
-  }
-
-  // 通常時は通知しない（異常時のみ通知）
-  console.log('[notify] 正常完了。通知不要');
-  return false;
-}
-
-module.exports = { sendWebhook, notifyAnomalies, notifyDailyReport, notifySuccess };
+module.exports = { sendWebhook, notifyAnomalies, buildImmediateMessage, IMMEDIATE_TYPES };

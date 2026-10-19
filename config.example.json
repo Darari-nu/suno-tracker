@@ -16,7 +16,7 @@
   },
   "schedule": {
     "intervalHours": 3,
-    "dailyReportHour": 9,
+    "dailyReportHour": 4,
     "newSongBoostDays": 10,
     "boostIntervalHours": 1
   },
