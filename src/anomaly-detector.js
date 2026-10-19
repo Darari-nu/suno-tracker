@@ -1,13 +1,17 @@
 const config = require('../config.json');
 
+// 1回の実行で「新曲」として扱う上限。超えたら取得異常とみなし NEW_SONG は出さない
+const MAX_NEW_SONGS_PER_RUN = 3;
+
 /**
  * 異常を検知する
  * @param {Object} currentData - 今回取得したアーティストデータ
  * @param {Object|null} previousData - 前回のアーティストデータ（csv-store.getLastSongsDataの結果）
  * @param {Array} trendResults - トレンド結果
+ * @param {Object} [knownSongIds] - { [artist]: Set<songId> } 保存前に作った全履歴の songId。無ければ prev.songs 比較にフォールバック
  * @returns {Array} 検知された異常のリスト
  */
-function detectAnomalies(currentData, previousData, trendResults) {
+function detectAnomalies(currentData, previousData, trendResults, knownSongIds) {
   const anomalies = [];
 
   // 1. データ取得失敗チェック
@@ -48,10 +52,22 @@ function detectAnomalies(currentData, previousData, trendResults) {
       const prev = previousData[artist];
 
       // 2.5. 新曲検知 (NEW_SONG)
-      if (data.songs && prev.songs) {
-        for (const song of data.songs) {
-          const isNew = !prev.songs.some(s => s.songId === song.songId);
-          if (isNew) {
+      // API取得時のみ。DOMフォールバックは不完全・不正確なので新曲判定に使わない
+      if (data.method === 'api' && data.songs && prev.songs) {
+        const known = knownSongIds && knownSongIds[artist];
+        const newSongs = data.songs.filter(song =>
+          known ? !known.has(song.songId) : !prev.songs.some(s => s.songId === song.songId)
+        );
+        if (newSongs.length > MAX_NEW_SONGS_PER_RUN) {
+          anomalies.push({
+            type: 'NEW_SONG_BURST',
+            severity: 'warning',
+            artist,
+            message: `${artist}: 一度に ${newSongs.length} 件の新曲を検知。取得異常の可能性があるため SRT 自動生成は送らない（本物の新曲なら vocal-srt-generator を手動実行）: ${newSongs.map(s => s.title).join(' / ')}`,
+            detail: { count: newSongs.length, titles: newSongs.map(s => s.title) }
+          });
+        } else {
+          for (const song of newSongs) {
             anomalies.push({
               type: 'NEW_SONG',
               severity: 'info',
@@ -165,4 +181,4 @@ function formatAnomalySummary(anomalies) {
   return summary;
 }
 
-module.exports = { detectAnomalies, formatAnomalySummary };
+module.exports = { detectAnomalies, formatAnomalySummary, MAX_NEW_SONGS_PER_RUN };

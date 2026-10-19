@@ -258,4 +258,23 @@ function parseCSVLine(line) {
   return fields;
 }
 
-module.exports = { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList };
+/**
+ * そのアーティストのCSV全履歴に出たことのある songId を Set で返す（`?` `#` 以降は除去して正規化）。
+ * ファイルが無ければ空 Set。
+ */
+function getKnownSongIds(artistName) {
+  const known = new Set();
+  const artistFile = getArtistFile(artistName);
+  if (!fs.existsSync(artistFile)) return known;
+
+  const lines = fs.readFileSync(artistFile, 'utf-8').split('\n');
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i]) continue;
+    const fields = parseCSVLine(lines[i]);
+    const id = String(fields[2] || '').split(/[?#]/)[0];
+    if (id) known.add(id);
+  }
+  return known;
+}
+
+module.exports = { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds };

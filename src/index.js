@@ -1,6 +1,6 @@
 const { scrapeAllArtists } = require('./scraper');
 const { checkAllTrends } = require('./trend-checker');
-const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList } = require('./csv-store');
+const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds } = require('./csv-store');
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, notifyDailyReport } = require('./notifier');
 const { hasRecentNewSong, shouldRunNow } = require('./frequency-checker');
@@ -40,6 +40,10 @@ async function main() {
     console.log('  前回データなし（初回実行）');
   }
 
+  // 保存前の全履歴 songId（新曲判定用。保存後だと今回分が入ってしまう）
+  const knownSongIds = {};
+  for (const a of config.artists) knownSongIds[a.name] = getKnownSongIds(a.name);
+
   // Step 2: アーティストデータ取得
   console.log('\n[2/6] アーティストデータを取得中...');
   const artistData = await scrapeAllArtists();
@@ -57,7 +61,7 @@ async function main() {
 
   // Step 5: 異常検知
   console.log('\n[5/6] 異常検知中...');
-  const anomalies = detectAnomalies(artistData, previousData, trendResults);
+  const anomalies = detectAnomalies(artistData, previousData, trendResults, knownSongIds);
   if (anomalies.length > 0) {
     const summary = formatAnomalySummary(anomalies);
     console.log('  異常を検知:\n' + summary);

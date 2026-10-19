@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const config = require('../config.json');
+const { normalizeDomSongs } = require('./song-normalize');
 
 /**
  * SUNO Profile API でアーティストの全曲データを取得する
@@ -86,7 +87,7 @@ async function scrapeArtistDOM(page, artistUrl) {
   }
 
   // 曲データを抽出
-  return await page.evaluate(() => {
+  const raw = await page.evaluate(() => {
     const songLinks = document.querySelectorAll('a[href*="/song/"]');
     const results = [];
     for (const link of songLinks) {
@@ -110,8 +111,7 @@ async function scrapeArtistDOM(page, artistUrl) {
             };
             results.push({
               title: link.innerText.trim(),
-              url: link.href,
-              songId: link.href.split('/song/')[1] || '',
+              href: link.href,
               plays: parseCount(numericLines[numericLines.length - 3]),
               likes: parseCount(numericLines[numericLines.length - 2]),
               comments: parseCount(numericLines[numericLines.length - 1])
@@ -123,6 +123,8 @@ async function scrapeArtistDOM(page, artistUrl) {
     }
     return results;
   });
+  // songId 正規化・`?` 付きリンク除外・重複除去はNode側で行う
+  return normalizeDomSongs(raw);
 }
 
 /**
