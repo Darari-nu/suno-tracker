@@ -139,3 +139,13 @@ suno-tracker/
 - データのスタック（同じ値が続く）
 - トレンドチェック失敗
 - API→DOMフォールバック発動（非公式API廃止の可能性）
+
+## SSD への音源・ジャケット自動保存（ローカル専用）
+
+`src/save_to_ssd.js` が SUNO の全曲（darari_nu→Dara、coban3137→coban）を `/Volumes/DevSSD/00_楽曲申請/{Dara|coban}/曲名/` に保存する。
+- 音源: フォルダに `.wav` があれば落とさない。無ければ `曲名.mp3`（既にあれば落とさない）。ジャケットは全曲 `曲名_jacket.jpg`。
+- 既存ファイルの上書き・削除・フォルダ改名はしない。SSD 未接続の日は何もせず終了し、次回にまとめて追いつく。
+- 手動実行: `node src/save_to_ssd.js --dry-run`（一覧だけ・書き込みなし）／ `node src/save_to_ssd.js`（実行）。`--root <path>` で保存先変更。
+- LaunchAgent の雛形: `scripts/launchd/com.darari.suno-ssd-save.plist`（毎日 05:30。`~/Library/LaunchAgents` へコピーして `launchctl load`）。
+- ログ: `/tmp/suno-ssd-save.log`
+- テスト: `node test/save-to-ssd.test.js`（ネットに出ない）

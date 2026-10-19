@@ -147,6 +147,9 @@ function streamDownload(url, destPath) {
         err.statusCode = res.statusCode;
         return reject(err);
       }
+      const onStreamError = (e) => { res.destroy(); file.destroy(); fs.unlink(tmpPath, () => {}); reject(e); };
+      res.on('error', onStreamError);
+      file.on('error', onStreamError);
       res.pipe(file);
       file.on('finish', () => {
         file.close((err) => {
