@@ -4,3 +4,4 @@
 {"ts":"2026-10-20T05:35:45.232Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":25},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-20T10:44:04.662Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":25},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"STALE_DATA","severity":"info","artist":"darari_nu","message":"darari_nu の全データが前回と同一。取得がスタックしている可能性あり"}]}
 {"ts":"2026-10-20T15:31:01.476Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":25},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
+{"ts":"2026-10-20T19:46:37.011Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":25},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
