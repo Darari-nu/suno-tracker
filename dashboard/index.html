@@ -332,6 +332,35 @@
     </div>
   </div>
 
+  <!-- フック（Hooks）視聴数推移 -->
+  <div class="grid-full" id="hooks-area" style="display:none;">
+    <div class="card">
+      <h2>フック（Hooks）視聴数推移</h2>
+      <div class="chart-container">
+        <canvas id="hooks-chart"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h2>フック一覧（最新）</h2>
+      <div style="overflow-x:auto;">
+        <table id="hooks-table">
+          <thead>
+            <tr>
+              <th>曲名</th>
+              <th>アーティスト</th>
+              <th class="num">視聴数</th>
+              <th class="num">いいね</th>
+              <th class="num">コメント</th>
+              <th class="num">24時間の視聴増</th>
+              <th>投稿日</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- 中段：曲別詳細 -->
   <h3 class="section-title">曲別詳細</h3>
   <div class="controls">

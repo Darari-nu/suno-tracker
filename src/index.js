@@ -1,6 +1,7 @@
 const { scrapeAllArtists } = require('./scraper');
 const { checkAllTrends } = require('./trend-checker');
-const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds } = require('./csv-store');
+const { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds, saveHooksData } = require('./csv-store');
+const { fetchAllHooks } = require('./hook-scraper');
 const { detectAnomalies, formatAnomalySummary } = require('./anomaly-detector');
 const { notifyAnomalies, sendWebhook, IMMEDIATE_TYPES } = require('./notifier');
 const { runDailyReportIfDue } = require('./daily-report');
@@ -27,6 +28,20 @@ async function main() {
     console.log(`[日報] ${r.sent ? '送信' : r.reason}`);
   } catch (err) {
     console.error('[日報] エラー（実行は継続）:', err.message);
+  }
+
+  // Step -0.5: フック（毎時。曲の収集が頻度チェックで休む回でも取る。失敗しても本体は止めない）
+  try {
+    const handles = config.artists.map(a => a.name);
+    const hookResults = await fetchAllHooks(handles);
+    for (const [name, r] of Object.entries(hookResults)) {
+      if (!r.success) console.log(`[フック] ${name}: 取得失敗（${r.error}）`);
+      else if (!r.found) console.log(`[フック] ${name}: 取得失敗（ページにフック一覧が見つからない）`);
+      else console.log(`[フック] ${name}: ${r.hooks.length}本`);
+    }
+    saveHooksData(hookResults, new Date().toISOString());
+  } catch (err) {
+    console.error('[フック] エラー（実行は継続）:', err.message);
   }
 
   // Step 0: 実行頻度チェック（新曲がなければ3時間おきのみ実行）

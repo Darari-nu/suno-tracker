@@ -10,6 +10,8 @@ const SONGS_HEADER = 'timestamp,artist,songId,title,url,plays,likes,comments,ima
 const TRENDS_HEADER = 'timestamp,region,period,artist,songId,title,rank,plays,likes';
 const FOLLOWERS_HEADER = 'timestamp,artist,followers,following';
 const FOLLOWERS_FILE = path.join(DATA_DIR, 'followers.csv');
+const HOOKS_HEADER = 'timestamp,artist,hookId,songId,songTitle,views,likes,comments,createdAt';
+const HOOKS_FILE = path.join(DATA_DIR, 'hooks.csv');
 
 /**
  * CSVの値をエスケープする
@@ -277,4 +279,33 @@ function getKnownSongIds(artistName) {
   return known;
 }
 
-module.exports = { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds };
+/**
+ * フックの視聴数・いいね・コメントをCSVに追記する（1本1行）
+ * hooksByArtist: { [name]: { success, found, hooks } }。success かつ found の名義だけ書く
+ */
+function saveHooksData(hooksByArtist, timestamp, filePath = HOOKS_FILE) {
+  ensureFile(filePath, HOOKS_HEADER);
+  const lines = [];
+  for (const [artistName, r] of Object.entries(hooksByArtist)) {
+    if (!r || !r.success || !r.found) continue;
+    for (const h of r.hooks) {
+      lines.push(csvRow([
+        timestamp,
+        artistName,
+        h.hookId,
+        h.songId,
+        h.songTitle,
+        h.views,
+        h.likes,
+        h.comments,
+        h.createdAt || ''
+      ]));
+    }
+  }
+  if (lines.length > 0) {
+    fs.appendFileSync(filePath, lines.join('\n') + '\n', 'utf-8');
+  }
+  return lines.length;
+}
+
+module.exports = { saveSongsData, saveTrendsData, saveFollowersData, getLastSongsData, saveArtistsList, getKnownSongIds, saveHooksData, HOOKS_FILE, HOOKS_HEADER };

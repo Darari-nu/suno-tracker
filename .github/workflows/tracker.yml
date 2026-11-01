@@ -43,8 +43,8 @@ jobs:
           CORRECT_HEADER="timestamp,artist,songId,title,url,plays,likes,comments,imageUrl,createdAt"
           for f in data/*.csv; do
             [ ! -f "$f" ] && continue
-            # followers.csv と trends.csv はスキップ
-            case "$f" in *followers.csv|*trends.csv) continue;; esac
+            # followers.csv と trends.csv と hooks.csv はスキップ
+            case "$f" in *followers.csv|*trends.csv|*hooks.csv) continue;; esac
             CURRENT=$(head -1 "$f")
             if [ "$CURRENT" != "$CORRECT_HEADER" ]; then
               echo "Fixing header: $f"

@@ -2,11 +2,13 @@
 let songsData = [];
 let trendsData = [];
 let followersData = [];
+let hooksData = [];
 let artistsInfo = {}; // { name: { avatar: url, followers: n, following: n } }
 let overviewChart = null;
 let songPlaysChart = null;
 let songLikesChart = null;
 let followersChart = null;
+let hooksChart = null;
 let tableSortKey = 'plays';
 let tableSortAsc = false;
 let yAxisFromZero = false;
@@ -141,6 +143,16 @@ async function loadFromCSV() {
       console.warn('followers.csv 読み込み失敗:', e.message);
     }
 
+    try {
+      const hooksRes = await fetch('../data/hooks.csv');
+      if (hooksRes.ok) {
+        const text = await hooksRes.text();
+        hooksData = parseCSV(text);
+      }
+    } catch (e) {
+      console.warn('hooks.csv 読み込み失敗:', e.message);
+    }
+
     if (songsData.length > 0) {
       fileInputArea.style.display = 'none';
       updateDashboard();
@@ -219,6 +231,7 @@ function updateDashboard() {
   updateStats();
   updateOverviewChart();
   updateFollowersChart();
+  updateHooksSection();
   updateSongDetail();
   updateSongsTable();
   updateTrendsTable();
@@ -484,6 +497,129 @@ function updateFollowersChart() {
       }
     }
   });
+}
+
+// === フック（Hooks）区画 ===
+function updateHooksSection() {
+  const area = document.getElementById('hooks-area');
+  const selectedArtist = artistSelect.value;
+  const period = periodSelect.value;
+
+  let rows = hooksData;
+  if (selectedArtist !== 'all') rows = rows.filter(d => d.artist === selectedArtist);
+  if (rows.length === 0) {
+    area.style.display = 'none';
+    return;
+  }
+  area.style.display = 'block';
+
+  // 表は期間に関係なく全記録から最新値と24時間差を出す。グラフだけ期間で絞る
+  let chartRows = rows;
+  if (period !== 'all') {
+    const cutoff = new Date();
+    if (period === '24h') cutoff.setHours(cutoff.getHours() - 24);
+    else if (period === '7d') cutoff.setDate(cutoff.getDate() - 7);
+    else if (period === '30d') cutoff.setDate(cutoff.getDate() - 30);
+    chartRows = rows.filter(d => new Date(d.timestamp) >= cutoff);
+  }
+
+  // hook ごとにまとめる
+  const byHook = {};
+  for (const d of rows) {
+    (byHook[d.hookId] = byHook[d.hookId] || []).push(d);
+  }
+  for (const id of Object.keys(byHook)) {
+    byHook[id].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  }
+  const labelOf = (r) => `${r.songTitle || r.hookId}（${r.artist}）`;
+
+  // 折れ線グラフ（系列は hook ごと）
+  const chartIds = Object.keys(byHook).filter(id => chartRows.some(d => d.hookId === id));
+  const datasets = chartIds.map((id, i) => {
+    const hookRows = chartRows.filter(d => d.hookId === id)
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    return {
+      label: labelOf(hookRows[hookRows.length - 1]),
+      data: hookRows.map(d => ({ x: new Date(d.timestamp), y: parseInt(d.views) || 0 })),
+      borderColor: COLORS[i % COLORS.length],
+      backgroundColor: COLORS[i % COLORS.length] + '20',
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0.3,
+      fill: false
+    };
+  });
+
+  if (hooksChart) hooksChart.destroy();
+  hooksChart = new Chart(document.getElementById('hooks-chart'), {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: false },
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            unit: 'day',
+            displayFormats: { day: 'M/d' },
+            tooltipFormat: 'yyyy/MM/dd HH:mm'
+          },
+          grid: { color: '#d4cdc2' },
+          ticks: { color: '#6b6560' }
+        },
+        y: {
+          title: { display: true, text: '視聴数', color: '#6b6560' },
+          grid: { color: '#d4cdc2' },
+          ticks: { color: '#6b6560' }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: { color: '#1a1a1a', boxWidth: 12, font: { size: 11 } },
+          position: 'bottom'
+        }
+      }
+    }
+  });
+
+  // 最新値の表（視聴数の多い順）
+  const latestList = Object.values(byHook).map(list => {
+    const latest = list[list.length - 1];
+    const target = new Date(latest.timestamp).getTime() - 24 * 60 * 60 * 1000;
+    // 20〜28時間前の記録のうち、24時間前に一番近いもの。無ければ「-」
+    let base = null;
+    let bestGap = Infinity;
+    const HOUR = 60 * 60 * 1000;
+    for (const r of list.slice(0, -1)) {
+      const t = new Date(r.timestamp).getTime();
+      const ago = new Date(latest.timestamp).getTime() - t;
+      if (ago < 20 * HOUR || ago > 28 * HOUR) continue;
+      const gap = Math.abs(t - target);
+      if (gap < bestGap) { bestGap = gap; base = r; }
+    }
+    const views = parseInt(latest.views) || 0;
+    const diff = base ? views - (parseInt(base.views) || 0) : null;
+    return { latest, views, diff };
+  }).sort((a, b) => b.views - a.views);
+
+  const tbody = document.querySelector('#hooks-table tbody');
+  tbody.innerHTML = '';
+  for (const { latest, views, diff } of latestList) {
+    const tr = document.createElement('tr');
+    const created = latest.createdAt ? latest.createdAt.slice(0, 10) : '-';
+    tr.innerHTML = `
+      <td>${escapeHtml(latest.songTitle || latest.hookId)}</td>
+      <td>${escapeHtml(latest.artist)}</td>
+      <td class="num">${views.toLocaleString()}</td>
+      <td class="num">${(parseInt(latest.likes) || 0).toLocaleString()}</td>
+      <td class="num">${(parseInt(latest.comments) || 0).toLocaleString()}</td>
+      <td class="num">${diff === null ? '-' : (diff === 0 ? '0' : formatDiffSmall(diff))}</td>
+      <td>${escapeHtml(created)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
 }
 
 // === 曲別詳細 ===
