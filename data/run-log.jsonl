@@ -82,3 +82,4 @@
 {"ts":"2026-11-05T01:12:04.859Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":47}},"anomalies":[]}
 {"ts":"2026-11-05T08:48:26.771Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":47}},"anomalies":[]}
 {"ts":"2026-11-05T16:59:46.686Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"NEW_SONG","severity":"info","artist":"coban3137","message":"🆕 **新曲検知** (coban3137): \"Argus\" が新しくリリースされました！"}]}
+{"ts":"2026-11-05T22:36:59.720Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
