@@ -91,3 +91,4 @@
 {"ts":"2026-11-07T09:28:11.313Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-11-07T16:00:08.270Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-11-07T20:00:30.757Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"STALE_DATA","severity":"info","artist":"darari_nu","message":"darari_nu の全データが前回と同一。取得がスタックしている可能性あり"}]}
+{"ts":"2026-11-07T23:31:57.176Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"STALE_DATA","severity":"info","artist":"coban3137","message":"coban3137 の全データが前回と同一。取得がスタックしている可能性あり"}]}
