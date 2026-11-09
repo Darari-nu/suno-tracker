@@ -97,3 +97,4 @@
 {"ts":"2026-11-08T16:54:55.733Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"NEW_SONG","severity":"info","artist":"darari_nu","message":"🆕 **新曲検知** (darari_nu): \"Do!Pa! （instrumental）\" が新しくリリースされました！"}]}
 {"ts":"2026-11-08T20:55:38.042Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-11-09T00:23:36.669Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
+{"ts":"2026-11-09T07:29:59.684Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
