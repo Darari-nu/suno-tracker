@@ -7,6 +7,12 @@ on:
 
 permissions:
   contents: write
+  actions: read
+
+# 同じワークフローを重ねて走らせない（失敗通知の重複を防ぐ）
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   track:
@@ -68,3 +74,27 @@ jobs:
           git add data/
           git diff --cached --quiet || git commit -m "data: update $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
+
+      # 通知は「このステップまで来た通常の実行」が対象。再実行（re-run）・強制キャンセル・ランナー停止は取りこぼすことがある
+      - name: Notify Discord on failure / recovery
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          NOW: ${{ job.status }}
+        run: |
+          [ -z "$WEBHOOK" ] && { echo "no webhook, skip"; exit 0; }
+          PREV=$(gh run list -R "$GITHUB_REPOSITORY" --workflow "$GITHUB_WORKFLOW" --branch main --status completed -L 10 \
+            --json databaseId,conclusion -q "[.[] | select(.databaseId != $GITHUB_RUN_ID)][0].conclusion // \"\"")
+          URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          MSG=""
+          if [ "$NOW" != "success" ] && [ "$PREV" = "success" ]; then
+            MSG="⚠️ SUNO Tracker（再生数・フォロワー収集） が失敗しました（$NOW）。データが取れていません。ログ: $URL"
+          elif [ "$NOW" = "success" ] && [ -n "$PREV" ] && [ "$PREV" != "success" ]; then
+            MSG="✅ SUNO Tracker（再生数・フォロワー収集） が復旧しました。ログ: $URL"
+          fi
+          echo "prev=$PREV now=$NOW"
+          [ -z "$MSG" ] && exit 0
+          jq -n --arg c "$MSG" '{content:$c}' | curl -sS -f --connect-timeout 10 --max-time 20 -H 'Content-Type: application/json' -d @- "$WEBHOOK" > /dev/null
