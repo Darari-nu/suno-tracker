@@ -1,5 +1,3 @@
-{"ts":"2026-10-25T00:43:04.920Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
-{"ts":"2026-10-25T05:33:21.602Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"STALE_DATA","severity":"info","artist":"coban3137","message":"coban3137 の全データが前回と同一。取得がスタックしている可能性あり"}]}
 {"ts":"2026-10-25T10:28:09.466Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-25T14:43:10.010Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-25T18:01:08.221Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[{"type":"STALE_DATA","severity":"info","artist":"coban3137","message":"coban3137 の全データが前回と同一。取得がスタックしている可能性あり"}]}
@@ -109,3 +107,4 @@
 {"ts":"2026-11-23T01:16:53.054Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-11-23T10:02:46.515Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-11-23T22:20:53.291Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[{"type":"NEW_SONG","severity":"info","artist":"coban3137","message":"🆕 **新曲検知** (coban3137): \"航跡\" が新しくリリースされました！"}]}
+{"ts":"2026-11-24T06:37:48.450Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[]}
