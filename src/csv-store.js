@@ -60,6 +60,10 @@ function saveSongsData(artistData) {
 
   for (const [artistName, data] of Object.entries(artistData)) {
     if (!data.success) continue;
+    if (!data.songCount && (!data.songs || data.songs.length === 0)) {
+      console.warn(`[csv] ${artistName}: 曲0件のため曲データを書かない（取得失敗の疑い）`);
+      continue;
+    }
 
     const artistFile = getArtistFile(artistName);
     ensureFile(artistFile, SONGS_HEADER);
@@ -119,6 +123,14 @@ function saveFollowersData(artistData) {
   const lines = [];
   for (const [artistName, data] of Object.entries(artistData)) {
     if (!data.success) continue;
+    if (!data.songCount && (!data.songs || data.songs.length === 0)) {
+      console.warn(`[csv] ${artistName}: 曲0件のためフォロワー行を書かない（取得失敗の疑い）`);
+      continue;
+    }
+    if (!data.followers && !data.following) {
+      console.warn(`[csv] ${artistName}: フォロワー0・フォロー0のため書かない（取得失敗の疑い）`);
+      continue;
+    }
     lines.push(csvRow([
       data.timestamp,
       artistName,

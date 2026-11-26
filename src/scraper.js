@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const config = require('../config.json');
 const { normalizeDomSongs } = require('./song-normalize');
+const { fetchNonEmptyWithRetry } = require('./retry');
 
 /**
  * SUNO Profile API でアーティストの全曲データを取得する
@@ -149,7 +150,10 @@ async function scrapeAllArtists() {
     try {
       // API方式で取得
       console.log(`[scraper]   API方式で取得...`);
-      const songs = await fetchArtistViaAPI(page, handle);
+      // 一時的な失敗・空応答（曲0件）に備え、5秒→15秒あけて最大2回再試行（それでも駄目なら下のDOM予備へ）
+      const songs = await fetchNonEmptyWithRetry(() => fetchArtistViaAPI(page, handle), {
+        onRetry: (err, n, ms) => console.warn(`[scraper]   API失敗(${err.message})。${ms / 1000}秒後に再試行 ${n}/2`)
+      });
 
       if (songs.length > 0) {
         results[handle] = {

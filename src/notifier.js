@@ -7,7 +7,22 @@ const { artistDisplay } = require('./daily-report');
 /**
  * Discord Webhook にメッセージを送信する
  */
-function sendWebhook(message) {
+const MENTION_USER_ID = '982891457000136715';
+const MENTION = `<@${MENTION_USER_ID}> `;
+
+/** Webhook の本文(JSON文字列用オブジェクト)を作る。mention=true のときだけ darari にメンションを許可する */
+function buildPayload(message, mention = false) {
+  return {
+    content: message.substring(0, 2000), // Discord の文字数制限
+    allowed_mentions: mention ? { users: [MENTION_USER_ID] } : { parse: [] }
+  };
+}
+
+/**
+ * @param {string} message
+ * @param {{mention?: boolean}} [opts] - トラブル通知のときだけ mention:true（日報などは付けない）
+ */
+function sendWebhook(message, opts = {}) {
   return new Promise((resolve, reject) => {
     if (!config.notification.enabled || !config.notification.discordWebhookUrl) {
       console.log('[notify] Webhook未設定。通知をスキップ');
@@ -17,9 +32,7 @@ function sendWebhook(message) {
     }
 
     const url = new URL(config.notification.discordWebhookUrl);
-    const payload = JSON.stringify({
-      content: message.substring(0, 2000) // Discord の文字数制限
-    });
+    const payload = JSON.stringify(buildPayload(message, !!opts.mention));
 
     const options = {
       hostname: url.hostname,
@@ -41,14 +54,14 @@ function sendWebhook(message) {
           console.log('[notify] Webhook送信成功');
           resolve(true);
         } else {
-          console.error(`[notify] Webhook送信失敗: ${res.statusCode} ${data}`);
+          console.error(`[notify] Webhook送信失敗: HTTP ${res.statusCode}（応答本文は記録しない）`);
           resolve(false);
         }
       });
     });
 
     req.on('error', (err) => {
-      console.error('[notify] Webhook送信エラー:', err.message);
+      console.error('[notify] Webhook送信エラー:', err.code || 'network error');
       resolve(false);
     });
 
@@ -74,9 +87,8 @@ function buildImmediateMessage(anomalies = []) {
       .join('\n');
   }
 
-  const needsMention = immediate.some(a => a.type === 'FETCH_ERROR' || a.type === 'ALL_TRENDS_FAILED');
-  const mention = needsMention ? '<@982891457000136715> ' : '';
-  return `${mention}🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${formatAnomalySummary(immediate)}`;
+  // 新曲だけでなければ全部トラブル通知 → メンション付き
+  return `${MENTION}🔔 **SUNO Tracker 異常検知**\n${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n\n${formatAnomalySummary(immediate)}`;
 }
 
 /**
@@ -87,7 +99,7 @@ function buildImmediateMessage(anomalies = []) {
 async function notifyAnomalies(anomalies = [], send = sendWebhook) {
   const message = buildImmediateMessage(anomalies);
   if (!message) return false;
-  return send(message);
+  return send(message, { mention: message.startsWith(MENTION) });
 }
 
-module.exports = { sendWebhook, notifyAnomalies, buildImmediateMessage, IMMEDIATE_TYPES };
+module.exports = { MENTION, MENTION_USER_ID, buildPayload, sendWebhook, notifyAnomalies, buildImmediateMessage, IMMEDIATE_TYPES };

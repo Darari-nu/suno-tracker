@@ -185,9 +185,9 @@ function dailySnaps(base, perDay, todayGrowth, extra = {}) {
     assert.strictEqual(sent.length, 2);
     assert(sent[1].startsWith('<@982891457000136715> 🔔 **SUNO Tracker 異常検知**'), sent[1]);
     assert(sent[1].includes('失敗') && !sent[1].includes('stale-msg'), sent[1]);
-    // 異常のみ(メンション無し)
+    // トラブル通知は全部メンション付き
     const m = buildImmediateMessage([{ type: 'API_FALLBACK', severity: 'warning', artist: 'a', message: 'fb' }]);
-    assert(m.startsWith('🔔') && !m.includes('<@'), m);
+    assert(m.startsWith('<@982891457000136715> 🔔'), m);
   });
 
   await t('注意行 / run-log 30日削除・壊れ行', () => {

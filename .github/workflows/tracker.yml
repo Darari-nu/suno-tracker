@@ -86,15 +86,23 @@ jobs:
           NOW: ${{ job.status }}
         run: |
           [ -z "$WEBHOOK" ] && { echo "no webhook, skip"; exit 0; }
-          PREV=$(gh run list -R "$GITHUB_REPOSITORY" --workflow "$GITHUB_WORKFLOW" --branch main --status completed -L 10 \
-            --json databaseId,conclusion -q "[.[] | select(.databaseId != $GITHUB_RUN_ID)][0].conclusion // \"\"")
+          PREV=$(gh run list -R "$GITHUB_REPOSITORY" --workflow "$GITHUB_WORKFLOW" --branch main --status completed -L 30 \
+            --json databaseId,conclusion -q "[.[] | select(.databaseId != $GITHUB_RUN_ID and (.conclusion == \"success\" or .conclusion == \"failure\"))][0].conclusion // \"\"")
           URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           MSG=""
-          if [ "$NOW" != "success" ] && [ "$PREV" = "success" ]; then
-            MSG="⚠️ SUNO Tracker（再生数・フォロワー収集） が失敗しました（$NOW）。データが取れていません。ログ: $URL"
-          elif [ "$NOW" = "success" ] && [ -n "$PREV" ] && [ "$PREV" != "success" ]; then
+          MENTION=0
+          if [ "$NOW" != "success" ] && [ "$PREV" != "failure" ]; then
+            MSG="⚠️ SUNO Tracker（再生数・フォロワー収集） が失敗しました（${NOW}）。データが取れていません。ログ: $URL"
+            MENTION=1
+          elif [ "$NOW" = "success" ] && [ "$PREV" = "failure" ]; then
             MSG="✅ SUNO Tracker（再生数・フォロワー収集） が復旧しました。ログ: $URL"
           fi
           echo "prev=$PREV now=$NOW"
           [ -z "$MSG" ] && exit 0
-          jq -n --arg c "$MSG" '{content:$c}' | curl -sS -f --connect-timeout 10 --max-time 20 -H 'Content-Type: application/json' -d @- "$WEBHOOK" > /dev/null
+          # 失敗のときだけ darari にメンション（復旧はメンションなし）
+          if [ "$MENTION" = "1" ]; then
+            BODY=$(jq -n --arg c "<@982891457000136715> $MSG" '{content:$c, allowed_mentions:{users:["982891457000136715"]}}')
+          else
+            BODY=$(jq -n --arg c "$MSG" '{content:$c, allowed_mentions:{parse:[]}}')
+          fi
+          printf '%s' "$BODY" | curl -sS -f --connect-timeout 10 --max-time 20 -H 'Content-Type: application/json' -d @- "$WEBHOOK" > /dev/null
