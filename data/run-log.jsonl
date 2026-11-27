@@ -1,4 +1,3 @@
-{"ts":"2026-10-28T19:13:01.107Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-28T23:45:45.857Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-29T03:42:31.373Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-29T10:37:02.774Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
@@ -101,3 +100,4 @@
 {"ts":"2026-11-26T22:43:24.317Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
 {"ts":"2026-11-27T04:40:59.335Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
 {"ts":"2026-11-27T14:32:34.926Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
+{"ts":"2026-11-27T23:06:21.239Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[{"type":"SONG_COUNT_DECREASE","severity":"warning","artist":"coban3137","message":"coban3137 の曲数が減少: 50 → 49"}]}
