@@ -1,5 +1,3 @@
-{"ts":"2026-10-28T06:29:13.626Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
-{"ts":"2026-10-28T13:41:58.726Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-28T19:13:01.107Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-28T23:45:45.857Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
 {"ts":"2026-10-29T03:42:31.373Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":26},"coban3137":{"success":true,"method":"api","songCount":48}},"anomalies":[]}
@@ -102,3 +100,4 @@
 {"ts":"2026-11-26T18:23:36.116Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[{"type":"NEW_SONG","severity":"info","artist":"coban3137","message":"🆕 **新曲検知** (coban3137): \"ABDUCTION\" が新しくリリースされました！"}]}
 {"ts":"2026-11-26T22:43:24.317Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
 {"ts":"2026-11-27T04:40:59.335Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
+{"ts":"2026-11-27T14:32:34.926Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
