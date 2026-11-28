@@ -14,6 +14,7 @@ async function fetchArtistViaAPI(page, handle) {
   let avatarUrl = '';
   let stats = null;
   let complete = false; // 全曲を取り切れたと分かったか（latest.json を書く条件）
+  let firstTotal = null, totalChanged = false;
 
   while (true) {
     const url = `https://studio-api-prod.suno.com/api/profiles/${handle}?playlists_sort_by=upvote_count&clips_sort_by=created_at&page=${pageNum}`;
@@ -24,6 +25,8 @@ async function fetchArtistViaAPI(page, handle) {
     }, url);
 
     totalClips = result.num_total_clips || 0;
+    // 総数がページごとに変わったら、その回は「取り切れた」と言わない（latest.json だけに効く・CSV の流れは変えない）
+    if (firstTotal === null) firstTotal = totalClips; else if (totalClips !== firstTotal) totalChanged = true;
     const clips = result.clips || [];
     if (!avatarUrl && clips.length > 0 && clips[0].avatar_image_url) {
       avatarUrl = clips[0].avatar_image_url;
@@ -56,7 +59,7 @@ async function fetchArtistViaAPI(page, handle) {
 
     console.log(`[scraper]   API page ${pageNum}: ${clips.length}曲取得 (累計: ${allClips.length}/${totalClips})`);
 
-    if (totalClips > 0 && allClips.length >= totalClips) complete = true;
+    if (totalClips > 0 && !totalChanged && allClips.length >= totalClips) complete = true;
     if (clips.length === 0 || allClips.length >= totalClips) break; // 従来どおりの終わり方
     pageNum++;
 
@@ -64,7 +67,7 @@ async function fetchArtistViaAPI(page, handle) {
     if (pageNum > 10) break;
   }
 
-  allClips.complete = complete;
+  allClips.complete = complete && !totalChanged;
   allClips.avatarUrl = avatarUrl;
   allClips.stats = stats || {};
   return allClips;

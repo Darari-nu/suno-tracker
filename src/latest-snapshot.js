@@ -84,8 +84,14 @@ function writeLatestSnapshot(args, filePath = LATEST_FILE) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   // 原子的に: 一時ファイルに書いてから rename（途中で失敗しても旧版を壊さない）
   const tmpPath = filePath + '.tmp';
-  fs.writeFileSync(tmpPath, JSON.stringify(snap, null, 1) + '\n', 'utf-8');
-  fs.renameSync(tmpPath, filePath);
+  try {
+    fs.writeFileSync(tmpPath, JSON.stringify(snap, null, 1) + '\n', 'utf-8');
+    fs.renameSync(tmpPath, filePath);
+  } catch (e) {
+    // 一時ファイルを残さない（Actions の git add data/ で公開されないように）
+    try { fs.unlinkSync(tmpPath); } catch { /* 無ければよい */ }
+    throw e;
+  }
   console.log(`[latest] latest.json 更新: ${snap.artists.map((a) => `${a.name} 曲${a.songs.length}/フック${a.hooks === null ? '未更新' : a.hooks.length}`).join(', ')}`);
   return true;
 }

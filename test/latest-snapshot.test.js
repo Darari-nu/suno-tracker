@@ -117,5 +117,15 @@ t('原子的に書く: 一時ファイルが残らず、rename の失敗で旧�
   assert.strictEqual(fs.readFileSync(f, 'utf-8'), before);
 });
 
+t('再監査: rename が失敗したら .tmp を残さない（Actions の git add data/ で公開されない）', () => {
+  const f = tmp();
+  const orig = fs.renameSync;
+  fs.renameSync = () => { throw new Error('boom'); };
+  try { assert.throws(() => writeLatestSnapshot(base(), f)); }
+  finally { fs.renameSync = orig; }
+  assert.ok(!fs.existsSync(f + '.tmp'));
+});
+
 if (failed) { console.log(failed + ' 件失敗'); process.exit(1); }
 console.log('全緑');
+
