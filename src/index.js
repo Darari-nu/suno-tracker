@@ -9,6 +9,7 @@ const { appendRunLog } = require('./run-log');
 const { hasRecentNewSong, shouldRunNow } = require('./frequency-checker');
 const { collectSongDetails } = require('./2ndbrain-publisher');
 const { dispatchSrtGeneration } = require('./srt-dispatcher');
+const { writeLatestSnapshot } = require('./latest-snapshot');
 const config = require('../config.json');
 
 async function main() {
@@ -30,10 +31,12 @@ async function main() {
     console.error('[日報] エラー（実行は継続）:', err.message);
   }
 
+  let hookResults = {};
+
   // Step -0.5: フック（毎時。曲の収集が頻度チェックで休む回でも取る。失敗しても本体は止めない）
   try {
     const handles = config.artists.map(a => a.name);
-    const hookResults = await fetchAllHooks(handles);
+    hookResults = await fetchAllHooks(handles);
     for (const [name, r] of Object.entries(hookResults)) {
       if (!r.success) console.log(`[フック] ${name}: 取得失敗（${r.error}）`);
       else if (!r.found) console.log(`[フック] ${name}: 取得失敗（ページにフック一覧が見つからない）`);
@@ -88,6 +91,11 @@ async function main() {
   const savedTrends = saveTrendsData(trendResults);
   const savedFollowers = saveFollowersData(artistData);
   saveArtistsList(artistData);
+  try {
+    writeLatestSnapshot({ artistData, hooksByArtist: hookResults, artistNames: config.artists.map(a => a.name) });
+  } catch (err) {
+    console.error('[latest] エラー（実行は継続）:', err.message);
+  }
 
   // Step 5: 異常検知
   console.log('\n[5/6] 異常検知中...');
