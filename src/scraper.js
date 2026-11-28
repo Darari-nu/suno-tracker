@@ -13,6 +13,7 @@ async function fetchArtistViaAPI(page, handle) {
   let totalClips = 0;
   let avatarUrl = '';
   let stats = null;
+  let complete = false; // 全曲を取り切れたと分かったか（latest.json を書く条件）
 
   while (true) {
     const url = `https://studio-api-prod.suno.com/api/profiles/${handle}?playlists_sort_by=upvote_count&clips_sort_by=created_at&page=${pageNum}`;
@@ -41,6 +42,12 @@ async function fetchArtistViaAPI(page, handle) {
           plays: clip.play_count || 0,
           likes: clip.upvote_count || 0,
           comments: clip.comment_count || 0,
+          // 欠けと 0 を区別するための生の値（数でなければ null）。CSV には出ない
+          rawCounts: {
+            plays: Number.isFinite(clip.play_count) ? clip.play_count : null,
+            likes: Number.isFinite(clip.upvote_count) ? clip.upvote_count : null,
+            comments: Number.isFinite(clip.comment_count) ? clip.comment_count : null
+          },
           imageUrl: clip.image_url || '',
           createdAt: clip.created_at || ''
         });
@@ -49,13 +56,15 @@ async function fetchArtistViaAPI(page, handle) {
 
     console.log(`[scraper]   API page ${pageNum}: ${clips.length}曲取得 (累計: ${allClips.length}/${totalClips})`);
 
-    if (clips.length === 0 || allClips.length >= totalClips) break;
+    if (totalClips > 0 && allClips.length >= totalClips) complete = true;
+    if (clips.length === 0 || allClips.length >= totalClips) break; // 従来どおりの終わり方
     pageNum++;
 
     // 安全弁: 10ページ以上はスキップ
     if (pageNum > 10) break;
   }
 
+  allClips.complete = complete;
   allClips.avatarUrl = avatarUrl;
   allClips.stats = stats || {};
   return allClips;
@@ -164,7 +173,11 @@ async function scrapeAllArtists() {
           method: 'api',
           avatarUrl: songs.avatarUrl || '',
           followers: songs.stats?.followers_count || 0,
-          following: songs.stats?.following_count || 0
+          following: songs.stats?.following_count || 0,
+          // 取り切れた印と、欠けを 0 にしない生のフォロワー数（latest.json 用）
+          complete: songs.complete === true,
+          rawFollowers: Number.isFinite(songs.stats?.followers_count) ? songs.stats.followers_count : null,
+          rawFollowing: Number.isFinite(songs.stats?.following_count) ? songs.stats.following_count : null
         };
         console.log(`[scraper] ${handle}: ${songs.length} 曲取得完了 (API)`);
         continue;

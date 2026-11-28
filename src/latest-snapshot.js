@@ -6,22 +6,18 @@ const path = require('path');
 const LATEST_FILE = path.resolve(__dirname, '..', 'data', 'latest.json');
 
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+// 取れなかったものは 0 にせず null
+const cnt = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 /**
  * artistData: scrapeAllArtists() の結果（saveSongsData に渡すものと同じ）
  * hooksByArtist: fetchAllHooks() の結果 { [name]: { success, found, hooks } }
  * artistNames: 揃っていなければならないアーティスト名（config.artists）
- * previous: 前回の latest.json の中身（フックの取得に失敗した名義だけ前の値を引き継ぐ）
  * 戻り値: 書くべき JSON のオブジェクト。書かない回は null。
  */
-function buildLatestSnapshot({ artistData, hooksByArtist = {}, artistNames, now = new Date(), previous = null }) {
+function buildLatestSnapshot({ artistData, hooksByArtist = {}, artistNames, now = new Date() }) {
   const names = artistNames || Object.keys(artistData || {});
   if (!artistData || names.length === 0) return null;
-
-  const prevByName = {};
-  if (previous && Array.isArray(previous.artists)) {
-    for (const a of previous.artists) if (a && a.name) prevByName[a.name] = a;
-  }
 
   const artists = [];
   for (const name of names) {
@@ -29,16 +25,27 @@ function buildLatestSnapshot({ artistData, hooksByArtist = {}, artistNames, now 
     // 既存の「0 件は記録しない」と同じ判断。1 名義でも欠けたら全体を書かない
     if (!d || !d.success || !Array.isArray(d.songs) || d.songs.length === 0) return null;
 
-    const hasFollowers = !!(d.followers || d.following);
-    const songs = d.songs.map((s) => ({
-      songId: s.songId,
-      title: s.title,
-      url: s.url,
-      plays: num(s.plays),
-      likes: num(s.likes),
-      comments: num(s.comments),
-      createdAt: s.createdAt || ''
-    }));
+    // 曲の一覧を最後まで取り切れたと分かった回だけ（API 方式の complete 印）
+    if (d.complete !== true) return null;
+
+    const songs = [];
+    for (const s of d.songs) {
+      const raw = s.rawCounts || { plays: s.plays, likes: s.likes, comments: s.comments };
+      const plays = cnt(raw.plays);
+      // plays が取れていない曲が 1 つでもあれば、その回は書かない
+      if (plays === null) return null;
+      songs.push({
+        songId: s.songId,
+        title: s.title,
+        url: s.url,
+        plays,
+        likes: cnt(raw.likes),
+        comments: cnt(raw.comments),
+        createdAt: s.createdAt || ''
+      });
+    }
+    const followers = cnt('rawFollowers' in d ? d.rawFollowers : d.followers);
+    const following = cnt('rawFollowing' in d ? d.rawFollowing : d.following);
 
     const h = hooksByArtist[name];
     let hooks;
@@ -53,13 +60,13 @@ function buildLatestSnapshot({ artistData, hooksByArtist = {}, artistNames, now 
         createdAt: x.createdAt || ''
       }));
     } else {
-      hooks = (prevByName[name] && prevByName[name].hooks) || [];
+      hooks = null; // この回はフックを更新していない（前回の値は持ち越さない）
     }
 
     artists.push({
       name,
-      followers: hasFollowers ? num(d.followers) : null,
-      following: hasFollowers ? num(d.following) : null,
+      followers,
+      following,
       songs,
       hooks
     });
@@ -67,21 +74,20 @@ function buildLatestSnapshot({ artistData, hooksByArtist = {}, artistNames, now 
   return { generatedAt: now.toISOString(), artists };
 }
 
-function readPrevious(filePath = LATEST_FILE) {
-  try { return JSON.parse(fs.readFileSync(filePath, 'utf-8')); } catch { return null; }
-}
-
 /** 作れたときだけ書く。書いたら true */
 function writeLatestSnapshot(args, filePath = LATEST_FILE) {
-  const snap = buildLatestSnapshot({ previous: readPrevious(filePath), ...args });
+  const snap = buildLatestSnapshot(args);
   if (!snap) {
     console.warn('[latest] 取得が揃っていないため latest.json を書き直さない（前のファイルを残す）');
     return false;
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(snap, null, 1) + '\n', 'utf-8');
-  console.log(`[latest] latest.json 更新: ${snap.artists.map((a) => `${a.name} 曲${a.songs.length}/フック${a.hooks.length}`).join(', ')}`);
+  // 原子的に: 一時ファイルに書いてから rename（途中で失敗しても旧版を壊さない）
+  const tmpPath = filePath + '.tmp';
+  fs.writeFileSync(tmpPath, JSON.stringify(snap, null, 1) + '\n', 'utf-8');
+  fs.renameSync(tmpPath, filePath);
+  console.log(`[latest] latest.json 更新: ${snap.artists.map((a) => `${a.name} 曲${a.songs.length}/フック${a.hooks === null ? '未更新' : a.hooks.length}`).join(', ')}`);
   return true;
 }
 
-module.exports = { buildLatestSnapshot, writeLatestSnapshot, readPrevious, LATEST_FILE };
+module.exports = { buildLatestSnapshot, writeLatestSnapshot, LATEST_FILE };

@@ -11,7 +11,7 @@ function t(name, fn) {
 }
 
 const song = (id, plays) => ({ songId: id, title: 'T' + id, url: 'https://suno.com/song/' + id, plays, likes: 2, comments: 1, imageUrl: 'x', createdAt: '2026-01-01T00:00:00Z' });
-const artist = (songs, followers = 10, following = 5) => ({ success: true, songs, songCount: songs.length, followers, following, timestamp: 't' });
+const artist = (songs, followers = 10, following = 5) => ({ success: true, complete: true, rawFollowers: followers, rawFollowing: following, songs, songCount: songs.length, followers, following, timestamp: 't' });
 const hook = (id) => ({ hookId: id, songId: 's1', songTitle: 'T1', views: 7, likes: 1, comments: 0, createdAt: '2026-10-20T00:00:00Z' });
 const names = ['a', 'b'];
 const base = () => ({
@@ -58,22 +58,63 @@ t('失敗・欠けた名義があれば書かない', () => {
   assert.strictEqual(buildLatestSnapshot(c), null);
 });
 
-t('フォロワーが片方の名義で欠けたらその名義の followers を null にする', () => {
+t('フォロワー: 取れなかった方だけ null（0 にしない）', () => {
   const a = base();
-  a.artistData.b = artist([song('s2', 50)], 0, 0);
+  a.artistData.b = { ...artist([song('s2', 50)]), rawFollowers: null, rawFollowing: 8 };
   const j = buildLatestSnapshot(a);
   assert.strictEqual(j.artists[1].followers, null);
-  assert.strictEqual(j.artists[1].following, null);
+  assert.strictEqual(j.artists[1].following, 8);
   assert.strictEqual(j.artists[0].followers, 10);
 });
 
-t('フックの取得に失敗した名義は前回のフックを引き継ぐ', () => {
+t('フォロワー 0 は 0 のまま', () => {
+  const a = base();
+  a.artistData.b = { ...artist([song('s2', 50)]), rawFollowers: 0, rawFollowing: 0 };
+  assert.strictEqual(buildLatestSnapshot(a).artists[1].followers, 0);
+});
+
+t('取り切れていない回（complete でない）は書かない', () => {
+  const a = base();
+  a.artistData.b.complete = false;
+  assert.strictEqual(buildLatestSnapshot(a), null);
+  const c = base();
+  delete c.artistData.b.complete;
+  assert.strictEqual(buildLatestSnapshot(c), null);
+});
+
+t('plays が取れていない曲があれば書かない／likes・comments は null', () => {
+  const a = base();
+  a.artistData.b.songs[0].rawCounts = { plays: null, likes: 1, comments: 1 };
+  assert.strictEqual(buildLatestSnapshot(a), null);
+  const c = base();
+  c.artistData.b.songs[0].rawCounts = { plays: 0, likes: null, comments: null };
+  const j = buildLatestSnapshot(c);
+  assert.strictEqual(j.artists[1].songs[0].plays, 0);
+  assert.strictEqual(j.artists[1].songs[0].likes, null);
+  assert.strictEqual(j.artists[1].songs[0].comments, null);
+});
+
+t('フックだけ取れなかった名義は hooks: null（持ち越さない）', () => {
   const f = tmp();
   writeLatestSnapshot(base(), f);
   const a = base();
   a.hooksByArtist.a = { success: false };
   writeLatestSnapshot(a, f);
-  assert.strictEqual(JSON.parse(fs.readFileSync(f, 'utf-8')).artists[0].hooks[0].hookId, 'h1');
+  const j = JSON.parse(fs.readFileSync(f, 'utf-8'));
+  assert.strictEqual(j.artists[0].hooks, null);
+  assert.strictEqual(j.artists[1].hooks.length, 0);
+});
+
+t('原子的に書く: 一時ファイルが残らず、rename の失敗で旧版が残る', () => {
+  const f = tmp();
+  writeLatestSnapshot(base(), f);
+  assert.ok(!fs.existsSync(f + '.tmp'));
+  const before = fs.readFileSync(f, 'utf-8');
+  const orig = fs.renameSync;
+  fs.renameSync = () => { throw new Error('boom'); };
+  try { assert.throws(() => writeLatestSnapshot({ ...base(), now: new Date('2027-01-01') }, f)); }
+  finally { fs.renameSync = orig; }
+  assert.strictEqual(fs.readFileSync(f, 'utf-8'), before);
 });
 
 if (failed) { console.log(failed + ' 件失敗'); process.exit(1); }
