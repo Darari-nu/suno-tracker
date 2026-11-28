@@ -1,4 +1,4 @@
-// data/latest.json: 最新の時点だけの小さな JSON（Rondo が読む）。
+// data/latest.json: 最新の時点だけの小さな JSON（外の集計ツールが読む）。
 // 取得に成功した回だけ書き直す。失敗・0件・一部欠けの回は前のファイルを残す（0 や欠けで上書きしない）。
 const fs = require('fs');
 const path = require('path');

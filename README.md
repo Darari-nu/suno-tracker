@@ -29,7 +29,7 @@ GitHub Pages
 | 実行するリポジトリ | いつ | やること | 成果物の行き先 |
 |---|---|---|---|
 | **suno-tracker**（ここ・PUBLIC） | 毎時 | 統計収集・新曲検知・dispatch | `data/*.csv`（自リポ）＋ Pagesのダッシュボード |
-| **suno-tracker**（同上） | 毎時（取得が揃った回だけ） | 最新の時点だけの小さな JSON を書く | `data/latest.json`（Rondo が読む。曲ごとの再生数・フック・フォロワー） |
+| **suno-tracker**（同上） | 毎時（取得が揃った回だけ） | 最新の時点だけの小さな JSON を書く | `data/latest.json`（外の集計ツールが読む。曲ごとの再生数・フック・フォロワー） |
 | **260525_vocal-srt-generator**（PRIVATE） | 新曲のdispatch時 | 音源分離→歌詞の聞き取り→SRT/beats生成 | `Dara_Brain/{曲名}/srt/` |
 | **Dara_Brain**（PRIVATE） | 毎日 15:30 JST | このリポの `src/sync_2ndbrain.js` を実行 | `Dara_Brain/{曲名}/{曲名}.md`（曲のカルテ） |
 
