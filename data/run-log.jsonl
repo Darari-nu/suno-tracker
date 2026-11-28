@@ -100,3 +100,4 @@
 {"ts":"2026-11-27T14:32:34.926Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":50}},"anomalies":[]}
 {"ts":"2026-11-27T23:06:21.239Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[{"type":"SONG_COUNT_DECREASE","severity":"warning","artist":"coban3137","message":"coban3137 の曲数が減少: 50 → 49"}]}
 {"ts":"2026-11-28T05:41:23.992Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[]}
+{"ts":"2026-11-28T10:07:00.809Z","artists":{"darari_nu":{"success":true,"method":"api","songCount":27},"coban3137":{"success":true,"method":"api","songCount":49}},"anomalies":[]}

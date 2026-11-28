@@ -1,0 +1,797 @@
+{
+ "generatedAt": "2026-11-28T10:07:00.808Z",
+ "artists": [
+  {
+   "name": "darari_nu",
+   "followers": 989,
+   "following": 386,
+   "songs": [
+    {
+     "songId": "565ae5ed-2ae8-494f-8e2c-ece6f62b14de",
+     "title": "狩蜂",
+     "url": "https://suno.com/song/565ae5ed-2ae8-494f-8e2c-ece6f62b14de",
+     "plays": 1277,
+     "likes": 115,
+     "comments": 11,
+     "createdAt": "2026-08-21T11:50:30.545Z"
+    },
+    {
+     "songId": "4703c2bf-c751-4980-a207-4225e5c9e61b",
+     "title": "Do!Pa! （instrumental）",
+     "url": "https://suno.com/song/4703c2bf-c751-4980-a207-4225e5c9e61b",
+     "plays": 1156,
+     "likes": 43,
+     "comments": 2,
+     "createdAt": "2026-11-08T03:57:44.582Z"
+    },
+    {
+     "songId": "384cd200-d0ac-447e-9ff0-949a1d239b51",
+     "title": "Own",
+     "url": "https://suno.com/song/384cd200-d0ac-447e-9ff0-949a1d239b51",
+     "plays": 809,
+     "likes": 134,
+     "comments": 16,
+     "createdAt": "2026-10-23T16:46:04.978Z"
+    },
+    {
+     "songId": "14646725-4011-465a-9f59-9a98169fd0f3",
+     "title": "満月と亀",
+     "url": "https://suno.com/song/14646725-4011-465a-9f59-9a98169fd0f3",
+     "plays": 1356,
+     "likes": 120,
+     "comments": 16,
+     "createdAt": "2026-10-06T15:08:07.622Z"
+    },
+    {
+     "songId": "e60ce0dd-6d17-4b5b-a513-914b7eea59f1",
+     "title": "鼓動  (Lyrics: coban)",
+     "url": "https://suno.com/song/e60ce0dd-6d17-4b5b-a513-914b7eea59f1",
+     "plays": 835,
+     "likes": 96,
+     "comments": 9,
+     "createdAt": "2026-09-03T00:41:15.874Z"
+    },
+    {
+     "songId": "eb6c1961-54ab-402e-8264-40773a4dc570",
+     "title": "不敵",
+     "url": "https://suno.com/song/eb6c1961-54ab-402e-8264-40773a4dc570",
+     "plays": 624,
+     "likes": 209,
+     "comments": 17,
+     "createdAt": "2026-07-22T14:02:16.450Z"
+    },
+    {
+     "songId": "7e0f15d1-7945-4677-9af7-9de28604e10c",
+     "title": "Cinderella",
+     "url": "https://suno.com/song/7e0f15d1-7945-4677-9af7-9de28604e10c",
+     "plays": 1042,
+     "likes": 262,
+     "comments": 20,
+     "createdAt": "2026-06-21T15:36:59.731Z"
+    },
+    {
+     "songId": "06d28e6a-59fa-46d6-a7a1-9203a87eeb4c",
+     "title": "前線",
+     "url": "https://suno.com/song/06d28e6a-59fa-46d6-a7a1-9203a87eeb4c",
+     "plays": 309,
+     "likes": 127,
+     "comments": 10,
+     "createdAt": "2026-06-15T16:56:57.268Z"
+    },
+    {
+     "songId": "91ccd9fb-a61f-42ac-b7e3-26b02d00788c",
+     "title": "遠吠え",
+     "url": "https://suno.com/song/91ccd9fb-a61f-42ac-b7e3-26b02d00788c",
+     "plays": 2225,
+     "likes": 298,
+     "comments": 30,
+     "createdAt": "2026-05-19T13:24:47.040Z"
+    },
+    {
+     "songId": "c6e83917-aead-4a3e-b6aa-9f825fa1471d",
+     "title": "The Antidote",
+     "url": "https://suno.com/song/c6e83917-aead-4a3e-b6aa-9f825fa1471d",
+     "plays": 1154,
+     "likes": 392,
+     "comments": 37,
+     "createdAt": "2026-04-19T08:01:22.206Z"
+    },
+    {
+     "songId": "bb8dc65c-a5f6-4399-9aaf-9b9640dbf08c",
+     "title": "Beast",
+     "url": "https://suno.com/song/bb8dc65c-a5f6-4399-9aaf-9b9640dbf08c",
+     "plays": 2444,
+     "likes": 488,
+     "comments": 44,
+     "createdAt": "2026-04-12T11:57:44.549Z"
+    },
+    {
+     "songId": "54bef081-c311-4055-8f73-a19633b60a74",
+     "title": "鬼灯",
+     "url": "https://suno.com/song/54bef081-c311-4055-8f73-a19633b60a74",
+     "plays": 1617,
+     "likes": 382,
+     "comments": 25,
+     "createdAt": "2026-04-01T14:03:51.967Z"
+    },
+    {
+     "songId": "2c2b8df8-af37-4b91-b0b6-98bb9dcc0759",
+     "title": "テンセグリティ",
+     "url": "https://suno.com/song/2c2b8df8-af37-4b91-b0b6-98bb9dcc0759",
+     "plays": 3041,
+     "likes": 534,
+     "comments": 40,
+     "createdAt": "2026-03-12T03:13:40.426Z"
+    },
+    {
+     "songId": "e389d0aa-1acf-48d3-930c-2bca08b4613c",
+     "title": "ブリキ男",
+     "url": "https://suno.com/song/e389d0aa-1acf-48d3-930c-2bca08b4613c",
+     "plays": 1573,
+     "likes": 430,
+     "comments": 31,
+     "createdAt": "2026-02-28T15:12:19.645Z"
+    },
+    {
+     "songId": "d3c0c370-3efc-46ed-89f7-9ec14f5248af",
+     "title": "雪泥",
+     "url": "https://suno.com/song/d3c0c370-3efc-46ed-89f7-9ec14f5248af",
+     "plays": 1761,
+     "likes": 444,
+     "comments": 20,
+     "createdAt": "2026-02-09T12:30:21.766Z"
+    },
+    {
+     "songId": "a0dd7606-0a87-4312-9fef-34ccef5a52e6",
+     "title": "LIFE",
+     "url": "https://suno.com/song/a0dd7606-0a87-4312-9fef-34ccef5a52e6",
+     "plays": 889,
+     "likes": 360,
+     "comments": 21,
+     "createdAt": "2026-02-06T16:41:15.835Z"
+    },
+    {
+     "songId": "b611d79e-6a38-4c7b-9999-036078b08ed7",
+     "title": "蹄",
+     "url": "https://suno.com/song/b611d79e-6a38-4c7b-9999-036078b08ed7",
+     "plays": 1603,
+     "likes": 383,
+     "comments": 22,
+     "createdAt": "2026-01-28T14:38:25.243Z"
+    },
+    {
+     "songId": "838a4082-03fb-4386-a5f3-61adef134444",
+     "title": "錯乱",
+     "url": "https://suno.com/song/838a4082-03fb-4386-a5f3-61adef134444",
+     "plays": 1948,
+     "likes": 399,
+     "comments": 19,
+     "createdAt": "2026-01-25T02:13:38.251Z"
+    },
+    {
+     "songId": "fff36bf3-93d0-44ae-90a7-8abca1272a01",
+     "title": "迷いながら",
+     "url": "https://suno.com/song/fff36bf3-93d0-44ae-90a7-8abca1272a01",
+     "plays": 415,
+     "likes": 170,
+     "comments": 14,
+     "createdAt": "2025-11-23T02:39:48.605Z"
+    },
+    {
+     "songId": "245ee29f-902d-4719-aae0-539b6e685cc6",
+     "title": "モノクロのくせにまだ眩しい",
+     "url": "https://suno.com/song/245ee29f-902d-4719-aae0-539b6e685cc6",
+     "plays": 279,
+     "likes": 118,
+     "comments": 3,
+     "createdAt": "2025-11-22T12:09:30.470Z"
+    },
+    {
+     "songId": "2719a7f0-9e84-4233-83ac-dce942b86746",
+     "title": "エンドレスミーティング",
+     "url": "https://suno.com/song/2719a7f0-9e84-4233-83ac-dce942b86746",
+     "plays": 108,
+     "likes": 75,
+     "comments": 2,
+     "createdAt": "2025-06-16T04:35:13.326Z"
+    },
+    {
+     "songId": "e8c5b7a4-ec8b-4038-a873-d53fbecab94c",
+     "title": "残業なんてしないなんて言わないよ絶対",
+     "url": "https://suno.com/song/e8c5b7a4-ec8b-4038-a873-d53fbecab94c",
+     "plays": 119,
+     "likes": 55,
+     "comments": 1,
+     "createdAt": "2025-06-07T21:40:58.777Z"
+    },
+    {
+     "songId": "e916100f-f168-4903-808e-92b29001e6ac",
+     "title": "辞表なんて書かないで",
+     "url": "https://suno.com/song/e916100f-f168-4903-808e-92b29001e6ac",
+     "plays": 87,
+     "likes": 38,
+     "comments": 2,
+     "createdAt": "2024-10-09T21:07:16.677Z"
+    },
+    {
+     "songId": "7899fb1a-3924-43d1-9bd5-0b046352d92b",
+     "title": "メタボの話をしよう",
+     "url": "https://suno.com/song/7899fb1a-3924-43d1-9bd5-0b046352d92b",
+     "plays": 101,
+     "likes": 51,
+     "comments": 4,
+     "createdAt": "2024-09-08T21:00:56.536Z"
+    },
+    {
+     "songId": "231e73f1-399d-414a-8cf7-cd0e367ccc01",
+     "title": "EXCEL師たち7",
+     "url": "https://suno.com/song/231e73f1-399d-414a-8cf7-cd0e367ccc01",
+     "plays": 103,
+     "likes": 43,
+     "comments": 0,
+     "createdAt": "2024-09-08T20:41:51.568Z"
+    },
+    {
+     "songId": "66fd867b-7511-4480-9722-35176ee8c16f",
+     "title": "トラブルはいつも金曜日",
+     "url": "https://suno.com/song/66fd867b-7511-4480-9722-35176ee8c16f",
+     "plays": 166,
+     "likes": 57,
+     "comments": 2,
+     "createdAt": "2024-08-15T01:04:39.309Z"
+    },
+    {
+     "songId": "66e3b0fa-e789-4ab3-9924-47e4209f6892",
+     "title": "ハラスメント注意報",
+     "url": "https://suno.com/song/66e3b0fa-e789-4ab3-9924-47e4209f6892",
+     "plays": 132,
+     "likes": 42,
+     "comments": 1,
+     "createdAt": "2024-08-12T23:53:11.048Z"
+    }
+   ],
+   "hooks": [
+    {
+     "hookId": "3bcbc91b-d315-47ec-8d78-9f625bd79484",
+     "songId": "565ae5ed-2ae8-494f-8e2c-ece6f62b14de",
+     "songTitle": "狩蜂",
+     "views": 672,
+     "likes": 6,
+     "comments": 11,
+     "createdAt": "2026-11-21T14:46:39.307463+00:00"
+    },
+    {
+     "hookId": "3a1587a3-49a4-4b02-bb71-83e90523bec4",
+     "songId": "4703c2bf-c751-4980-a207-4225e5c9e61b",
+     "songTitle": "Do!Pa! （instrumental）",
+     "views": 807,
+     "likes": 10,
+     "comments": 3,
+     "createdAt": "2026-11-08T14:50:18.071695+00:00"
+    },
+    {
+     "hookId": "f3885d75-698b-4019-8970-338ffd46dc80",
+     "songId": "91ccd9fb-a61f-42ac-b7e3-26b02d00788c",
+     "songTitle": "遠吠え",
+     "views": 962,
+     "likes": 24,
+     "comments": 30,
+     "createdAt": "2026-10-31T12:28:45.376612+00:00"
+    },
+    {
+     "hookId": "c54f333f-5da6-4ec8-8b88-d6b10c476516",
+     "songId": "14646725-4011-465a-9f59-9a98169fd0f3",
+     "songTitle": "満月と亀",
+     "views": 784,
+     "likes": 22,
+     "comments": 17,
+     "createdAt": "2026-10-11T02:37:31.260075+00:00"
+    },
+    {
+     "hookId": "2be5ea5a-3c36-43b6-8bac-a278f9fbdada",
+     "songId": "e60ce0dd-6d17-4b5b-a513-914b7eea59f1",
+     "songTitle": "鼓動  (Lyrics: coban)",
+     "views": 54,
+     "likes": 3,
+     "comments": 9,
+     "createdAt": "2026-09-03T07:15:37.396143+00:00"
+    }
+   ]
+  },
+  {
+   "name": "coban3137",
+   "followers": 1653,
+   "following": 858,
+   "songs": [
+    {
+     "songId": "fc1a70e9-7b16-4b9f-a215-a8aa98826521",
+     "title": "航跡",
+     "url": "https://suno.com/song/fc1a70e9-7b16-4b9f-a215-a8aa98826521",
+     "plays": 531,
+     "likes": 87,
+     "comments": 12,
+     "createdAt": "2026-11-21T23:44:18.882Z"
+    },
+    {
+     "songId": "09e4047d-3e05-42b2-97b0-febe585b71c5",
+     "title": "Enter",
+     "url": "https://suno.com/song/09e4047d-3e05-42b2-97b0-febe585b71c5",
+     "plays": 3856,
+     "likes": 626,
+     "comments": 38,
+     "createdAt": "2026-02-24T13:32:38.328Z"
+    },
+    {
+     "songId": "3667b43f-501c-4443-bba2-c72785145ec6",
+     "title": "Argus",
+     "url": "https://suno.com/song/3667b43f-501c-4443-bba2-c72785145ec6",
+     "plays": 498,
+     "likes": 122,
+     "comments": 11,
+     "createdAt": "2026-11-05T02:24:29.705Z"
+    },
+    {
+     "songId": "431563b8-c770-4039-88a5-539a0e6ef76e",
+     "title": "Gestalt",
+     "url": "https://suno.com/song/431563b8-c770-4039-88a5-539a0e6ef76e",
+     "plays": 1272,
+     "likes": 142,
+     "comments": 11,
+     "createdAt": "2026-10-17T07:45:58.345Z"
+    },
+    {
+     "songId": "a17fcf24-d059-4568-bb02-207e889d1792",
+     "title": "ABDUCTION",
+     "url": "https://suno.com/song/a17fcf24-d059-4568-bb02-207e889d1792",
+     "plays": 92,
+     "likes": 36,
+     "comments": 4,
+     "createdAt": "2026-11-26T09:46:29.265Z"
+    },
+    {
+     "songId": "f654ba7a-ddde-4adb-b6aa-b28491ee8095",
+     "title": "とかげ",
+     "url": "https://suno.com/song/f654ba7a-ddde-4adb-b6aa-b28491ee8095",
+     "plays": 592,
+     "likes": 127,
+     "comments": 12,
+     "createdAt": "2026-09-18T13:19:00.812Z"
+    },
+    {
+     "songId": "33a9a590-3356-4f63-990e-f2b181420b30",
+     "title": "She's A Little Bit",
+     "url": "https://suno.com/song/33a9a590-3356-4f63-990e-f2b181420b30",
+     "plays": 344,
+     "likes": 89,
+     "comments": 10,
+     "createdAt": "2026-09-08T22:20:17.210Z"
+    },
+    {
+     "songId": "6cdb38e4-7669-470a-8b8e-bffe9dfbe1b8",
+     "title": "Clock Drift",
+     "url": "https://suno.com/song/6cdb38e4-7669-470a-8b8e-bffe9dfbe1b8",
+     "plays": 310,
+     "likes": 162,
+     "comments": 6,
+     "createdAt": "2026-08-30T12:41:24.408Z"
+    },
+    {
+     "songId": "85eff203-2ca2-45bb-9a44-6c5e8ee16123",
+     "title": "はじまりの場所（instrumental）",
+     "url": "https://suno.com/song/85eff203-2ca2-45bb-9a44-6c5e8ee16123",
+     "plays": 484,
+     "likes": 97,
+     "comments": 8,
+     "createdAt": "2026-08-13T22:16:35.237Z"
+    },
+    {
+     "songId": "d906ef77-42cd-4915-89e4-c7b054bb7176",
+     "title": "LE MARAIS",
+     "url": "https://suno.com/song/d906ef77-42cd-4915-89e4-c7b054bb7176",
+     "plays": 388,
+     "likes": 99,
+     "comments": 7,
+     "createdAt": "2026-08-02T13:52:46.706Z"
+    },
+    {
+     "songId": "a2dc14b2-c50b-4e1e-b702-ec7493e27980",
+     "title": "素数",
+     "url": "https://suno.com/song/a2dc14b2-c50b-4e1e-b702-ec7493e27980",
+     "plays": 1046,
+     "likes": 290,
+     "comments": 29,
+     "createdAt": "2026-07-13T12:35:53.392Z"
+    },
+    {
+     "songId": "8d741fb0-17e9-45c4-a3c4-11ccc12a4710",
+     "title": "孤高",
+     "url": "https://suno.com/song/8d741fb0-17e9-45c4-a3c4-11ccc12a4710",
+     "plays": 813,
+     "likes": 255,
+     "comments": 17,
+     "createdAt": "2026-06-18T04:49:15.820Z"
+    },
+    {
+     "songId": "df2c59e1-8c9d-428c-9993-ac38b18c86b2",
+     "title": "Blue hour",
+     "url": "https://suno.com/song/df2c59e1-8c9d-428c-9993-ac38b18c86b2",
+     "plays": 954,
+     "likes": 285,
+     "comments": 21,
+     "createdAt": "2026-06-01T12:49:36.652Z"
+    },
+    {
+     "songId": "9d1157bf-f4e0-44f4-b01a-e8ae2d5ccca1",
+     "title": "side:B",
+     "url": "https://suno.com/song/9d1157bf-f4e0-44f4-b01a-e8ae2d5ccca1",
+     "plays": 856,
+     "likes": 287,
+     "comments": 18,
+     "createdAt": "2026-05-05T12:50:15.350Z"
+    },
+    {
+     "songId": "4baa6e0c-f136-4b6c-9967-4925febb7d01",
+     "title": "LOVE",
+     "url": "https://suno.com/song/4baa6e0c-f136-4b6c-9967-4925febb7d01",
+     "plays": 1033,
+     "likes": 327,
+     "comments": 17,
+     "createdAt": "2026-04-28T12:00:11.117Z"
+    },
+    {
+     "songId": "413d7a37-0488-402b-9eff-e6129ed0b8f4",
+     "title": "水脈",
+     "url": "https://suno.com/song/413d7a37-0488-402b-9eff-e6129ed0b8f4",
+     "plays": 2342,
+     "likes": 454,
+     "comments": 25,
+     "createdAt": "2026-04-01T14:57:48.882Z"
+    },
+    {
+     "songId": "37fff5cc-6c21-48cc-9001-e8a44cce39e1",
+     "title": "確信",
+     "url": "https://suno.com/song/37fff5cc-6c21-48cc-9001-e8a44cce39e1",
+     "plays": 3033,
+     "likes": 557,
+     "comments": 42,
+     "createdAt": "2026-03-16T13:10:39.524Z"
+    },
+    {
+     "songId": "ea380879-4b65-413b-848a-5fb62a784f7b",
+     "title": "フラクタル",
+     "url": "https://suno.com/song/ea380879-4b65-413b-848a-5fb62a784f7b",
+     "plays": 2729,
+     "likes": 514,
+     "comments": 29,
+     "createdAt": "2026-03-06T16:16:08.238Z"
+    },
+    {
+     "songId": "9afbbb8b-684a-4295-b15c-14248d25dfac",
+     "title": "渦中",
+     "url": "https://suno.com/song/9afbbb8b-684a-4295-b15c-14248d25dfac",
+     "plays": 2178,
+     "likes": 492,
+     "comments": 31,
+     "createdAt": "2026-02-17T14:41:34.050Z"
+    },
+    {
+     "songId": "ecaca2b3-5fc9-499c-ae32-73a840b1bd71",
+     "title": "Reach",
+     "url": "https://suno.com/song/ecaca2b3-5fc9-499c-ae32-73a840b1bd71",
+     "plays": 2342,
+     "likes": 501,
+     "comments": 26,
+     "createdAt": "2026-02-01T02:33:17.977Z"
+    },
+    {
+     "songId": "79cf91bc-167e-481f-9a49-b581919560c4",
+     "title": "BINARY",
+     "url": "https://suno.com/song/79cf91bc-167e-481f-9a49-b581919560c4",
+     "plays": 5883,
+     "likes": 766,
+     "comments": 51,
+     "createdAt": "2026-01-23T15:24:27.721Z"
+    },
+    {
+     "songId": "7db7c323-2788-4bcd-92eb-0ff9bd28b182",
+     "title": "UNDEFINED",
+     "url": "https://suno.com/song/7db7c323-2788-4bcd-92eb-0ff9bd28b182",
+     "plays": 3169,
+     "likes": 569,
+     "comments": 23,
+     "createdAt": "2026-01-11T08:46:57.644Z"
+    },
+    {
+     "songId": "7a7cd339-97b2-4e17-bcd2-1c6cbbde22a5",
+     "title": "Orbital  Noise",
+     "url": "https://suno.com/song/7a7cd339-97b2-4e17-bcd2-1c6cbbde22a5",
+     "plays": 1978,
+     "likes": 431,
+     "comments": 19,
+     "createdAt": "2026-01-05T04:20:14.764Z"
+    },
+    {
+     "songId": "4a93e8db-95d0-4c83-aeae-e4f720ba7b39",
+     "title": "PLAYER (Cover)",
+     "url": "https://suno.com/song/4a93e8db-95d0-4c83-aeae-e4f720ba7b39",
+     "plays": 2614,
+     "likes": 423,
+     "comments": 23,
+     "createdAt": "2025-12-31T17:54:19.184Z"
+    },
+    {
+     "songId": "786a1466-4a2f-47fe-b2de-78caa8941c64",
+     "title": "White Mist",
+     "url": "https://suno.com/song/786a1466-4a2f-47fe-b2de-78caa8941c64",
+     "plays": 1524,
+     "likes": 427,
+     "comments": 21,
+     "createdAt": "2025-12-27T08:26:23.643Z"
+    },
+    {
+     "songId": "9cc935d4-e782-4ebd-abc5-344fe5be484d",
+     "title": "九十九神ジャンク",
+     "url": "https://suno.com/song/9cc935d4-e782-4ebd-abc5-344fe5be484d",
+     "plays": 626,
+     "likes": 255,
+     "comments": 9,
+     "createdAt": "2025-12-20T16:26:55.239Z"
+    },
+    {
+     "songId": "0985e72d-bd92-4f65-824a-f83c1260c39a",
+     "title": "OUTLAST",
+     "url": "https://suno.com/song/0985e72d-bd92-4f65-824a-f83c1260c39a",
+     "plays": 743,
+     "likes": 364,
+     "comments": 18,
+     "createdAt": "2025-12-12T03:26:08.438Z"
+    },
+    {
+     "songId": "7a61acb1-a38f-44a1-b1e0-2a6b47fce830",
+     "title": "Kingdom of Light  (Instrumental)",
+     "url": "https://suno.com/song/7a61acb1-a38f-44a1-b1e0-2a6b47fce830",
+     "plays": 616,
+     "likes": 255,
+     "comments": 5,
+     "createdAt": "2025-12-05T15:35:50.333Z"
+    },
+    {
+     "songId": "90cea43c-5d90-4319-b8f4-4fa14750e173",
+     "title": "Receptor",
+     "url": "https://suno.com/song/90cea43c-5d90-4319-b8f4-4fa14750e173",
+     "plays": 773,
+     "likes": 322,
+     "comments": 9,
+     "createdAt": "2025-12-02T12:29:10.872Z"
+    },
+    {
+     "songId": "53183945-29e6-4a24-b365-af5642354351",
+     "title": "ABDUCTION",
+     "url": "https://suno.com/song/53183945-29e6-4a24-b365-af5642354351",
+     "plays": 1190,
+     "likes": 400,
+     "comments": 16,
+     "createdAt": "2025-11-26T14:42:31.764Z"
+    },
+    {
+     "songId": "6b56cd00-b761-46c1-babb-d965340c3ba0",
+     "title": "Happy Merry Christmas",
+     "url": "https://suno.com/song/6b56cd00-b761-46c1-babb-d965340c3ba0",
+     "plays": 1634,
+     "likes": 367,
+     "comments": 3,
+     "createdAt": "2025-11-20T13:47:25.212Z"
+    },
+    {
+     "songId": "a5fa0511-db26-4279-9f7b-c5f0f3bf95ae",
+     "title": "GUILT",
+     "url": "https://suno.com/song/a5fa0511-db26-4279-9f7b-c5f0f3bf95ae",
+     "plays": 2918,
+     "likes": 507,
+     "comments": 21,
+     "createdAt": "2025-11-15T11:39:57.224Z"
+    },
+    {
+     "songId": "0ea1d9f3-ac14-4765-9ba8-cdc5bda7a252",
+     "title": "火花",
+     "url": "https://suno.com/song/0ea1d9f3-ac14-4765-9ba8-cdc5bda7a252",
+     "plays": 1356,
+     "likes": 362,
+     "comments": 18,
+     "createdAt": "2025-11-07T16:37:33.123Z"
+    },
+    {
+     "songId": "1f60ea66-a54e-44bb-9991-812f66a6200f",
+     "title": "夢喰いバク",
+     "url": "https://suno.com/song/1f60ea66-a54e-44bb-9991-812f66a6200f",
+     "plays": 981,
+     "likes": 275,
+     "comments": 13,
+     "createdAt": "2025-10-16T15:26:57.191Z"
+    },
+    {
+     "songId": "7978153c-f428-4d74-b48f-1af9b8dabe3b",
+     "title": "Remains",
+     "url": "https://suno.com/song/7978153c-f428-4d74-b48f-1af9b8dabe3b",
+     "plays": 482,
+     "likes": 204,
+     "comments": 9,
+     "createdAt": "2025-10-08T15:13:42.845Z"
+    },
+    {
+     "songId": "5b91255d-e68a-44cd-932f-b7cd1738ddca",
+     "title": "A Traveler's Sonnet (Instrumental)",
+     "url": "https://suno.com/song/5b91255d-e68a-44cd-932f-b7cd1738ddca",
+     "plays": 1756,
+     "likes": 228,
+     "comments": 7,
+     "createdAt": "2025-10-05T05:53:12.768Z"
+    },
+    {
+     "songId": "f8aba961-3746-4191-b8a7-45454f79d90e",
+     "title": "PLAYER",
+     "url": "https://suno.com/song/f8aba961-3746-4191-b8a7-45454f79d90e",
+     "plays": 900,
+     "likes": 170,
+     "comments": 3,
+     "createdAt": "2025-10-04T17:47:01.127Z"
+    },
+    {
+     "songId": "fac7e753-eb01-437f-9631-cd37758d88ae",
+     "title": "Juggernaut （Instrumental）",
+     "url": "https://suno.com/song/fac7e753-eb01-437f-9631-cd37758d88ae",
+     "plays": 383,
+     "likes": 124,
+     "comments": 7,
+     "createdAt": "2025-09-23T08:06:31.629Z"
+    },
+    {
+     "songId": "ecc0227e-1e99-4c3b-84b9-d25b427f0242",
+     "title": "Onslaught（Instrumental）",
+     "url": "https://suno.com/song/ecc0227e-1e99-4c3b-84b9-d25b427f0242",
+     "plays": 283,
+     "likes": 112,
+     "comments": 3,
+     "createdAt": "2025-09-15T16:08:50.503Z"
+    },
+    {
+     "songId": "260eb17e-aeac-4b19-b880-dcdd5520bdb0",
+     "title": "parallel",
+     "url": "https://suno.com/song/260eb17e-aeac-4b19-b880-dcdd5520bdb0",
+     "plays": 212,
+     "likes": 96,
+     "comments": 3,
+     "createdAt": "2025-09-15T13:58:41.463Z"
+    },
+    {
+     "songId": "e8e1ae73-ae13-4a2b-b1f2-50579111ee94",
+     "title": "battle!!（Instrumental）",
+     "url": "https://suno.com/song/e8e1ae73-ae13-4a2b-b1f2-50579111ee94",
+     "plays": 1548,
+     "likes": 149,
+     "comments": 5,
+     "createdAt": "2025-08-22T15:41:59.367Z"
+    },
+    {
+     "songId": "41997f74-84d1-41bd-84a5-d604e4725bd8",
+     "title": "Invasion",
+     "url": "https://suno.com/song/41997f74-84d1-41bd-84a5-d604e4725bd8",
+     "plays": 575,
+     "likes": 146,
+     "comments": 4,
+     "createdAt": "2025-08-17T23:44:37.864Z"
+    },
+    {
+     "songId": "2a799ece-2360-4c5d-b595-dc22c27d414f",
+     "title": "Charge!!（instrumental）",
+     "url": "https://suno.com/song/2a799ece-2360-4c5d-b595-dc22c27d414f",
+     "plays": 236,
+     "likes": 79,
+     "comments": 0,
+     "createdAt": "2025-08-10T22:35:47.431Z"
+    },
+    {
+     "songId": "4f2c80bc-283e-406d-849b-bde0fc595302",
+     "title": "クロスフェード",
+     "url": "https://suno.com/song/4f2c80bc-283e-406d-849b-bde0fc595302",
+     "plays": 287,
+     "likes": 83,
+     "comments": 2,
+     "createdAt": "2025-08-08T14:35:54.036Z"
+    },
+    {
+     "songId": "c1b56c69-468d-489a-9c9a-99e8972d99a0",
+     "title": "BEACON",
+     "url": "https://suno.com/song/c1b56c69-468d-489a-9c9a-99e8972d99a0",
+     "plays": 441,
+     "likes": 84,
+     "comments": 6,
+     "createdAt": "2025-07-31T16:51:22.811Z"
+    },
+    {
+     "songId": "0a963a7f-75ac-4fe7-a20d-724007802c2c",
+     "title": "みにくいウサギ",
+     "url": "https://suno.com/song/0a963a7f-75ac-4fe7-a20d-724007802c2c",
+     "plays": 289,
+     "likes": 109,
+     "comments": 3,
+     "createdAt": "2025-07-24T16:10:06.509Z"
+    },
+    {
+     "songId": "4b65e16e-1929-49ce-a76c-6c67d93a89ca",
+     "title": "いちばん星",
+     "url": "https://suno.com/song/4b65e16e-1929-49ce-a76c-6c67d93a89ca",
+     "plays": 124,
+     "likes": 68,
+     "comments": 2,
+     "createdAt": "2025-07-12T10:30:12.306Z"
+    },
+    {
+     "songId": "20c8ba09-c1a6-473c-a4cc-94df9dc64c07",
+     "title": "キオク",
+     "url": "https://suno.com/song/20c8ba09-c1a6-473c-a4cc-94df9dc64c07",
+     "plays": 185,
+     "likes": 62,
+     "comments": 2,
+     "createdAt": "2025-07-01T10:04:11.761Z"
+    },
+    {
+     "songId": "795d96c8-08f8-4250-b05e-960b4fdd4101",
+     "title": "鳥かご",
+     "url": "https://suno.com/song/795d96c8-08f8-4250-b05e-960b4fdd4101",
+     "plays": 147,
+     "likes": 47,
+     "comments": 2,
+     "createdAt": "2025-06-05T13:35:32.646Z"
+    }
+   ],
+   "hooks": [
+    {
+     "hookId": "a5ba94e1-9242-4a4f-b9f3-4ff7dc62d853",
+     "songId": "fc1a70e9-7b16-4b9f-a215-a8aa98826521",
+     "songTitle": "航跡",
+     "views": 27,
+     "likes": 5,
+     "comments": 12,
+     "createdAt": "2026-11-23T14:59:04.401502+00:00"
+    },
+    {
+     "hookId": "df548aa9-68fe-4abc-92d5-aa221e11ec01",
+     "songId": "09e4047d-3e05-42b2-97b0-febe585b71c5",
+     "songTitle": "Enter",
+     "views": 356,
+     "likes": 9,
+     "comments": 39,
+     "createdAt": "2026-11-13T13:55:36.142944+00:00"
+    },
+    {
+     "hookId": "63b15aa8-6005-446c-9bd1-4e1667634117",
+     "songId": "3667b43f-501c-4443-bba2-c72785145ec6",
+     "songTitle": "Argus",
+     "views": 40,
+     "likes": 6,
+     "comments": 11,
+     "createdAt": "2026-11-05T15:17:11.335476+00:00"
+    },
+    {
+     "hookId": "cfb7ef08-9cca-4734-af58-a39955bba05f",
+     "songId": "431563b8-c770-4039-88a5-539a0e6ef76e",
+     "songTitle": "Gestalt",
+     "views": 674,
+     "likes": 15,
+     "comments": 12,
+     "createdAt": "2026-10-17T12:11:15.452255+00:00"
+    },
+    {
+     "hookId": "0d8adf82-1e2b-4e94-be28-e9ea4e14e10b",
+     "songId": "f654ba7a-ddde-4adb-b6aa-b28491ee8095",
+     "songTitle": "とかげ",
+     "views": 59,
+     "likes": 11,
+     "comments": 13,
+     "createdAt": "2026-09-18T14:51:57.889557+00:00"
+    }
+   ]
+  }
+ ]
+}
